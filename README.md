@@ -4,12 +4,15 @@
 
 > **Status: 0.1-DRAFT / research prototype / not production crypto**
 
-EDP is a draft peer-to-peer entropy augmentation protocol for embedded systems.
-Each node keeps its own local entropy pool. Remote contributions are authenticated,
-conditioned, and mixed into that pool -- they never replace local entropy. The goal
-is to make a mesh of constrained devices less dependent on any single entropy service,
-while keeping the failure mode boring: a bad peer can fail to help, but shouldn't
-be able to make a healthy local pool worse.
+EDP is a draft peer-to-peer entropy augmentation protocol for embedded systems --
+anywhere a fleet of constrained devices boots from the same power event and needs
+cryptographic randomness before local entropy has accumulated. No central server.
+No call-home. Every node contributes, every contribution is Ed25519-signed, and
+the protocol is designed so that a compromised peer cannot degrade a healthy
+neighbor's entropy pool.
+
+Target: RISC-V embedded (Kendryte K230-class), but the reference implementation
+builds on any POSIX system with a C11 compiler.
 
 This repository is the protocol specification and a reference C implementation.
 Neither is production-ready. Neither has been independently audited. Treat this as
@@ -182,6 +185,64 @@ This is the same mesh-of-constrained-devices problem EDP was designed for.
 regulated gaming use. Any deployment in a gaming environment would require
 independent certification by an accredited testing laboratory. The use case
 described here is a potential application, not a claim of readiness.
+
+---
+
+## Potential application: autonomous fleets and edge AI
+
+Any fleet of devices that boots together has an entropy problem.
+
+A thousand autonomous vehicles receive the same OTA update overnight. At 6 AM,
+they all cold-start from the same firmware image, on the same silicon, within
+the same few minutes. Each one needs cryptographic randomness immediately --
+TLS session keys for fleet telemetry, nonces for sensor-fusion authentication,
+sampling entropy for on-device inference. The hardware TRNG (if one exists)
+may not have accumulated enough thermal noise yet. The OS entropy pool is
+near-empty. And every vehicle in the lot is in the same state at the same time.
+
+EDP turns that fleet into a mesh. Each vehicle contributes what entropy it has.
+One vehicle's wheel-speed jitter is another vehicle's remote entropy source.
+The protocol never replaces local entropy -- it augments it. A compromised node
+in the fleet cannot poison its neighbors' pools. And because EDP is peer-to-peer,
+the fleet does not depend on reaching a cloud entropy service to bootstrap.
+
+**Where this applies:**
+
+- **Autonomous vehicle fleets.** Cars, trucks, delivery robots, drones -- any
+  fleet that OTA-updates and cold-starts together. EDP provides entropy
+  diversity from the physical mesh without requiring internet connectivity
+  at boot. The Ed25519 audit trail lets fleet operators verify which peer
+  contributed what entropy and when.
+
+- **On-device AI inference.** Local language models, vision models, and
+  decision systems need randomness for token sampling, differential privacy
+  noise, and exploration in reinforcement learning. When inference runs on
+  the device (not in the cloud), local entropy quality matters. A mesh of
+  peer devices pooling entropy means no single device is stuck with only
+  its own boot-time randomness.
+
+- **RISC-V robotics.** The reference implementation targets Kendryte K230-class
+  RISC-V SoCs -- the same class of silicon shipping in current-generation
+  embedded robotics and edge compute platforms. A robot's limbs, torso, and
+  sensor arrays are separate embedded nodes on the same bus. EDP lets them
+  share entropy across that bus without trusting any single limb's local source.
+
+- **Mesh-connected IoT at scale.** Smart grid sensors, industrial controllers,
+  agricultural monitoring nodes -- any deployment where hundreds or thousands
+  of embedded devices share a local network and boot from the same firmware.
+  EDP requires only UDP multicast and ~4KB of RAM per peer.
+
+- **Air-gapped and denied environments.** Because EDP is peer-to-peer with no
+  cloud dependency, it works in environments where calling home is not an
+  option: submarine vehicles, underground mining, disaster-response mesh
+  networks, or any deployment where connectivity is intermittent or
+  deliberately severed.
+
+**Important caveats:** EDP is a draft protocol. It has not been deployed in any
+autonomous vehicle, robotics fleet, or production AI system. The applications
+described here are potential use cases based on the protocol's design properties,
+not claims of deployment or readiness. Any safety-critical use would require
+independent security review and domain-specific certification.
 
 ---
 
