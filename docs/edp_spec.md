@@ -1,4 +1,4 @@
-# EDP — Entropy Distribution Protocol
+# EDP: Entropy Distribution Protocol
 ## Specification, Security Model, and Test Plans
 **Version:** 0.1-DRAFT  
 **Date:** 2026-06-18  
@@ -9,11 +9,11 @@
 
 ## 1. Problem Statement
 
-Embedded systems in closed-loop environments (no internet connectivity, fixed physical mesh) suffer from entropy starvation — particularly at boot time and after node resets. Existing solutions fall into two categories:
+Embedded systems in closed-loop environments (no internet connectivity, fixed physical mesh) suffer from entropy starvation -- particularly at boot time and after node resets. Existing solutions fall into two categories:
 
-**Local hardware sources** (TRNGs, timing jitter, thermal noise) — adequate when the hardware includes a quality TRNG, but not all OCU classes will, and freshness degrades during idle periods.
+**Local hardware sources** (TRNGs, timing jitter, thermal noise) -- adequate when the hardware includes a quality TRNG, but not all OCU classes will, and freshness degrades during idle periods.
 
-**Client-server models** (QEaaS, RISC-V TEE entropy servers, drand) — require a trusted central entropy server. This introduces a single point of failure incompatible with the DOCS fault-tolerance model, and doesn't exploit the rich physical entropy sources distributed across the mesh (motor encoder jitter, IMU noise, audio DSP, CAN bus timing variance, etc.).
+**Client-server models** (QEaaS, RISC-V TEE entropy servers, drand) -- require a trusted central entropy server. This introduces a single point of failure incompatible with the DOCS fault-tolerance model, and doesn't exploit the rich physical entropy sources distributed across the mesh (motor encoder jitter, IMU noise, audio DSP, CAN bus timing variance, etc.).
 
 **The gap:** No standardized lightweight protocol exists for peer-to-peer entropy distribution in a closed-loop embedded mesh where:
 - Every node is simultaneously a producer and consumer
@@ -30,8 +30,8 @@ EDP fills this gap.
 | System | Model | Peer-to-peer? | Sensor entropy? | Closed-loop? | Fault-tolerant mesh? |
 |---|---|---|---|---|---|
 | drand | Threshold BLS beacon | No (committee) | No | No (internet) | Partial |
-| QEaaS (arXiv 2603.10274) | QRNG server → clients | No | No | Yes | No |
-| RISC-V TEE entropy supply (arXiv 2603.09311) | TEE server → IoT fleet | No | Partial | Yes | No |
+| QEaaS (arXiv 2603.10274) | QRNG server -> clients | No | No | Yes | No |
+| RISC-V TEE entropy supply (arXiv 2603.09311) | TEE server -> IoT fleet | No | Partial | Yes | No |
 | Remote QRNG via D-Bus (ACM 2026) | Single-host IPC | No | No | Yes | No |
 | **EDP (this spec)** | **Peer mesh** | **Yes** | **Yes** | **Yes** | **Yes** |
 
@@ -41,17 +41,17 @@ EDP is not a replacement for hardware TRNGs or local entropy daemons. It is an e
 
 ## 3. Design Principles
 
-**P1 — Augmentation only, never replacement.** External entropy is XOR-mixed into the local pool. An adversary controlling all remote nodes cannot reduce a node's entropy below its local source floor.
+**P1 -- Augmentation only, never replacement.** External entropy is XOR-mixed into the local pool. An adversary controlling all remote nodes cannot reduce a node's entropy below its local source floor.
 
-**P2 — Physical entropy is first-class.** Sensor readings (IMU noise, encoder jitter, audio DSP residuals, thermal sensors) are valid, high-quality entropy sources in a running embedded system. EDP provides a standard interface for registering and advertising these sources.
+**P2 -- Physical entropy is first-class.** Sensor readings (IMU noise, encoder jitter, audio DSP residuals, thermal sensors) are valid, high-quality entropy sources in a running embedded system. EDP provides a standard interface for registering and advertising these sources.
 
-**P3 — FPGA TRNG is privileged.** FPGA ring-oscillator TRNGs are hardware-attested and cannot be manipulated by software. EDP assigns them the highest source quality tier.
+**P3 -- FPGA TRNG is privileged.** FPGA ring-oscillator TRNGs are hardware-attested and cannot be manipulated by software. EDP assigns them the highest source quality tier.
 
-**P4 — Lightweight.** EDP must run on RISC-V E-class cores (RV32IMC, 200 MHz, < 64 KB RAM). No threshold BLS, no pairing-based crypto, no Go runtime. UDP + BLAKE3 + X25519.
+**P4 -- Lightweight.** EDP must run on RISC-V E-class cores (RV32IMC, 200 MHz, < 64 KB RAM). No threshold BLS, no pairing-based crypto, no Go runtime. UDP + BLAKE3 + X25519.
 
-**P5 — PTP-aware.** EDP can use PTP-synchronized time windows to coordinate entropy injection across the mesh, allowing all nodes to seed their CSPRNGs from the same mesh entropy epoch simultaneously. This is optional and gracefully degrades without PTP.
+**P5 -- PTP-aware.** EDP can use PTP-synchronized time windows to coordinate entropy injection across the mesh, allowing all nodes to seed their CSPRNGs from the same mesh entropy epoch simultaneously. This is optional and gracefully degrades without PTP.
 
-**P6 — No trust hierarchy.** Every node has equal status. There is no master entropy server. If Agent Zero goes offline, entropy continues flowing.
+**P6 -- No trust hierarchy.** Every node has equal status. There is no master entropy server. If Agent Zero goes offline, entropy continues flowing.
 
 ---
 
@@ -74,18 +74,18 @@ EDP is not a replacement for hardware TRNGs or local entropy daemons. It is an e
 EDP operates in three phases per cycle:
 
 ```
-PHASE 1 — HARVEST (local, continuous)
+PHASE 1 -- HARVEST (local, continuous)
   Each node collects raw entropy from its registered sources.
   Raw bytes are conditioned through BLAKE3 keyed hash.
   Conditioned entropy accumulates in a local staging buffer.
 
-PHASE 2 — BROADCAST (mesh, periodic)
+PHASE 2 -- BROADCAST (mesh, periodic)
   Every BROADCAST_INTERVAL (default: 1 second), each node:
     1. Packs a conditioned Entropy Contribution (EC) from its staging buffer.
     2. Signs EC with its node identity key (Ed25519).
     3. Multicasts EC to all mesh peers over UDP.
 
-PHASE 3 — MIX (local, on receive)
+PHASE 3 -- MIX (local, on receive)
   On receiving an EC from a peer:
     1. Verify Ed25519 signature against known peer identity.
     2. Reject if source quality tier is UNKNOWN or UNTRUSTED.
@@ -104,12 +104,12 @@ Sources are classified at registration time. Tier affects how received contribut
 
 | Tier | Name | Examples | Bits/s estimate | Attestation |
 |---|---|---|---|---|
-| 0 | FPGA_TRNG | Ring oscillator TRNG in FPGA fabric | 1–100 Mbit/s | Hardware (FPGA bitstream signature) |
-| 1 | HARDWARE_TRNG | CPU TRNG (e.g., Seed CSR on RISC-V) | 1–10 Mbit/s | CPU architectural |
-| 2 | SENSOR_PHYSICAL | IMU noise, encoder jitter, microphone thermal, CAN bus timing | 100–10K bit/s | Software-declared, heuristically validated |
-| 3 | TIMING_JITTER | Execution timing jitter (haveged-style) | 10–1K bit/s | Software-declared |
+| 0 | FPGA_TRNG | Ring oscillator TRNG in FPGA fabric | 1-100 Mbit/s | Hardware (FPGA bitstream signature) |
+| 1 | HARDWARE_TRNG | CPU TRNG (e.g., Seed CSR on RISC-V) | 1-10 Mbit/s | CPU architectural |
+| 2 | SENSOR_PHYSICAL | IMU noise, encoder jitter, microphone thermal, CAN bus timing | 100-10K bit/s | Software-declared, heuristically validated |
+| 3 | TIMING_JITTER | Execution timing jitter (haveged-style) | 10-1K bit/s | Software-declared |
 | 4 | CSPRNG_RESEED | Output of a local CSPRNG after mixing | N/A | Derived |
-| 5 | UNKNOWN | Unregistered or unverified source | — | Rejected |
+| 5 | UNKNOWN | Unregistered or unverified source | -- | Rejected |
 
 Tier 0 and Tier 1 are hardware-attested. A node claiming Tier 0 without an FPGA-attested bitstream signature is downgraded to UNKNOWN and rejected.
 
@@ -119,7 +119,7 @@ Tier 0 and Tier 1 are hardware-attested. A node claiming Tier 0 without an FPGA-
 
 ### 7.1 Entropy Contribution (EC) Packet
 
-Sent by every node every BROADCAST_INTERVAL. Multicast to `224.0.EDP.1` (TBD IANA assignment) on UDP port 3140 (proposed; ref: Claude Shannon b. 1916 → 1916 mod 2048 = 1916... let's go with 4086 as homage to RFC 4086 on randomness requirements, or simply request assignment).
+Sent by every node every BROADCAST_INTERVAL. Multicast to `224.0.EDP.1` (TBD IANA assignment) on UDP port 3140 (proposed; ref: Claude Shannon b. 1916 -> 1916 mod 2048 = 1916... let's go with 4086 as homage to RFC 4086 on randomness requirements, or simply request assignment).
 
 ```
  0                   1                   2                   3
@@ -136,7 +136,7 @@ Sent by every node every BROADCAST_INTERVAL. Multicast to `224.0.EDP.1` (TBD IAN
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | Entropy Byte Count (16-bit)   | Health Score (16-bit, 0-1000) |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Entropy Bytes (variable, 32–256 bytes)                        |
+| Entropy Bytes (variable, 32-256 bytes)                        |
 | ...                                                           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | Ed25519 Signature (64 bytes)                                  |
@@ -145,11 +145,11 @@ Sent by every node every BROADCAST_INTERVAL. Multicast to `224.0.EDP.1` (TBD IAN
 ```
 
 **Type values:**
-- `0x1` — EC (Entropy Contribution)
-- `0x2` — HELLO (node announcement, carries public key)
-- `0x3` — HEALTH (health-only update, no entropy bytes)
-- `0x4` — EPOCH_SYNC (PTP-synchronized injection trigger)
-- `0x5` — REVOKE (node is declaring its own key compromised)
+- `0x1` -- EC (Entropy Contribution)
+- `0x2` -- HELLO (node announcement, carries public key)
+- `0x3` -- HEALTH (health-only update, no entropy bytes)
+- `0x4` -- EPOCH_SYNC (PTP-synchronized injection trigger)
+- `0x5` -- REVOKE (node is declaring its own key compromised)
 
 ### 7.2 HELLO Packet
 
@@ -173,7 +173,7 @@ Capabilities flags: `0x01` = PTP-capable, `0x02` = FPGA-TRNG present, `0x04` = R
 
 ---
 
-## 8. Entropy Harvesting — Source Integration
+## 8. Entropy Harvesting -- Source Integration
 
 ### 8.1 FPGA TRNG (Tier 0)
 
@@ -187,12 +187,12 @@ Minimum target: 1 Mbit/s raw, ≥ 0.5 bits entropy per raw bit after NIST SP 800
 
 | Sensor | Entropy extraction method | Notes |
 |---|---|---|
-| IMU (accel/gyro) | LSBs of readings at rest; difference from predicted value | ~50–200 bits/s |
+| IMU (accel/gyro) | LSBs of readings at rest; difference from predicted value | ~50-200 bits/s |
 | Motor encoder | Timing jitter of index pulses | Higher entropy when motor is running |
 | CAN FD bus | Frame arrival timing jitter | ~100 bits/s typical |
 | Microphone | Thermal noise floor (no sound) | DSP OCU only; ~1 Kbit/s |
 | Thermal sensors | Temperature LSB noise | Very slow; ~1 bit/s, useful only for seeding |
-| NPU execution timing | Cycle count jitter in matrix ops | ~10–50 bits/s |
+| NPU execution timing | Cycle count jitter in matrix ops | ~10-50 bits/s |
 
 Raw readings are passed through a von Neumann corrector or BLAKE3 conditioning before entering the staging buffer.
 
@@ -243,7 +243,7 @@ EC packets are Ed25519-signed. An adversary cannot spoof a legitimate node's con
 
 ### 10.4 Sybil Attack
 
-New nodes must send a HELLO packet and be observed for at least one HELLO_INTERVAL before their EC contributions are accepted. This doesn't prevent a well-resourced attacker from inserting a physical node, but it limits drive-by injection. In DOCS context, the physical bus is assumed to be within a controlled chassis — physical access is the threat boundary.
+New nodes must send a HELLO packet and be observed for at least one HELLO_INTERVAL before their EC contributions are accepted. This doesn't prevent a well-resourced attacker from inserting a physical node, but it limits drive-by injection. In DOCS context, the physical bus is assumed to be within a controlled chassis -- physical access is the threat boundary.
 
 ### 10.5 Denial of Service (Entropy Flooding)
 
@@ -357,21 +357,21 @@ A node claiming Tier 0 (FPGA TRNG) without attestation evidence is downgraded to
 |---|---|---|---|
 | 1 | IANA port assignment for EDP | Low | Use ephemeral port for prototype; seek assignment on standardization |
 | 2 | NIST SP 800-90B estimation of sensor sources | High | Estimation is difficult; may overestimate entropy rate from sensors |
-| 3 | Ed25519 sign on RV32 E-core at 200 MHz — latency budget | High | Need to benchmark; may need pre-computation or use E-core only for broadcast |
+| 3 | Ed25519 sign on RV32 E-core at 200 MHz -- latency budget | High | Need to benchmark; may need pre-computation or use E-core only for broadcast |
 | 4 | BLAKE3 availability on RISC-V embedded toolchains | Medium | Reference implementation exists; verify it builds for RV32IMC without FPU |
 | 5 | Physical sensor entropy correlation | Medium | IMU noise on adjacent nodes in same chassis may be correlated (shared vibration); reduces effective entropy diversity |
 | 6 | Interaction with Linux kernel getrandom vs. /dev/random | Medium | Kernel 5.17+ unified the two; but embedded kernels may be older |
 | 7 | TEE availability on target SoCs for key storage | Medium | K230 and LM4A have TEE support; verify keystore API |
 | 8 | Multicast routing on 2.5GbE managed switch | Low | Enable IGMP snooping; test multicast reach across VLAN if segmented |
 | 9 | PTP grandmaster election stability | Low | If PTP grandmaster changes mid-epoch, EPOCH_SYNC may be delayed; graceful fallback needed |
-| 10 | Standardization path (IETF vs. IEEE) | Medium | PTP companion → IEEE 1588 WG. Embedded mesh → IETF ROLL WG. Or independent IETF RFC. |
+| 10 | Standardization path (IETF vs. IEEE) | Medium | PTP companion -> IEEE 1588 WG. Embedded mesh -> IETF ROLL WG. Or independent IETF RFC. |
 
 ---
 
-## Appendix A — Reference Implementation Sketch (C, RISC-V E-core target)
+## Appendix A -- Reference Implementation Sketch (C, RISC-V E-core target)
 
 ```c
-/* edp_harvest.c — minimal EDP entropy harvester */
+/* edp_harvest.c -- minimal EDP entropy harvester */
 #include <stdint.h>
 #include <string.h>
 #include "blake3.h"      /* BLAKE3 reference implementation */
@@ -430,9 +430,9 @@ static void mix_into_pool(uint8_t *pool, size_t pool_len,
 
 ---
 
-## Appendix B — Relationship to Claude Shannon
+## Appendix B -- Relationship to Claude Shannon
 
-Claude Shannon's 1948 paper "A Mathematical Theory of Communication" defined entropy as a measure of information content and uncertainty. EDP applies this directly: the protocol's security rests on the entropy (unpredictability) of each node's local physical state. Shannon showed that you cannot transmit more information than the channel's capacity — EDP similarly cannot inject more entropy into a pool than the sum of the true entropy rates of all contributing sources. The protocol is honest about this: health scores are estimates, not guarantees, and the security model degrades gracefully rather than silently when source quality drops.
+Claude Shannon's 1948 paper "A Mathematical Theory of Communication" defined entropy as a measure of information content and uncertainty. EDP applies this directly: the protocol's security rests on the entropy (unpredictability) of each node's local physical state. Shannon showed that you cannot transmit more information than the channel's capacity -- EDP similarly cannot inject more entropy into a pool than the sum of the true entropy rates of all contributing sources. The protocol is honest about this: health scores are estimates, not guarantees, and the security model degrades gracefully rather than silently when source quality drops.
 
 The proposed UDP port 4086 is a nod to RFC 4086 ("Randomness Requirements for Security"), which remains the canonical reference for why this problem matters.
 

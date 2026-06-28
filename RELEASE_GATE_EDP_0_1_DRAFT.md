@@ -1,6 +1,6 @@
 # Release Gate: EDP 0.1-DRAFT
 
-**Release:** hydrogenuine-edp v0.1-DRAFT  
+**Release:** EDP v0.1-DRAFT  
 **Date:** 2026-06-28  
 **Verdict:** See bottom of this document.
 
@@ -105,7 +105,7 @@ thing a contributor should do.
 - Remote contributions should not reduce the security of an uncompromised local pool,
   under the random-oracle assumption for BLAKE3 (proof sketch only).
 - The reference implementation runs on Linux x86 and cross-compiles to RISC-V (riscv64-musl).
-- Prior art was surveyed in March–June 2026 and EDP's peer-mesh architecture
+- Prior art was surveyed in March-June 2026 and EDP's peer-mesh architecture
   appears to be novel as of that date.
 - The BLAKE3 and Monocypher libraries have their own security histories; EDP uses them
   as dependencies, not as novel cryptographic contributions.
@@ -126,7 +126,7 @@ thing a contributor should do.
 
 ## Final verdict
 
-**READY TO PUSH: YES** — with the caveats that build and test status are
+**READY TO PUSH: YES** -- with the caveats that build and test status are
 unverified in the release tree (vendor fetch required), and consumers must
 treat this as a research/prototype release per all documentation.
 

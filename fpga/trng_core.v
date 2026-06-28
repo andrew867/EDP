@@ -2,7 +2,7 @@
 // Treat as a reference sketch. Entropy output quality must be measured before production use.
 
 /*
- * trng_core.v — Ring-oscillator TRNG core for Lattice ECP5
+ * trng_core.v  -- Ring-oscillator TRNG core for Lattice ECP5
  * Hydrogenuine / Project DOCS
  * MIT License
  *

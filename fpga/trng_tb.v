@@ -2,7 +2,7 @@
 // Treat as a reference sketch. Entropy output quality must be measured before production use.
 
 /*
- * trng_tb.v — Testbench for trng_top and trng_core
+ * trng_tb.v  -- Testbench for trng_top and trng_core
  * Hydrogenuine / Project DOCS
  * MIT License
  *
@@ -134,7 +134,7 @@ initial begin
     mmio_read(2'b10, rdata);
     $display("[T4] Fill count = %0d words", rdata[7:0]);
 
-    /* ── Test 5: BIST — disable TRNG, wait for dead flag ─────────── */
+    /* ── Test 5: BIST  -- disable TRNG, wait for dead flag ─────────── */
     $display("[T5] Testing BIST timeout...");
     mmio_write(2'b11, 32'h0);  /* CTRL: ENABLE=0 */
     /* Wait for BIST_TIMEOUT cycles in clk_s domain (shortened for sim) */

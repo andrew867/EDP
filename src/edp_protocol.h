@@ -1,5 +1,5 @@
 /*
- * edp_protocol.h — Packet encode, decode, and validate
+ * edp_protocol.h  -- Packet encode, decode, and validate
  * Hydrogenuine / Project DOCS
  * MIT License
  */

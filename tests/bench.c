@@ -1,5 +1,5 @@
 /*
- * bench.c — EDP performance benchmarks (stub)
+ * bench.c -- EDP performance benchmarks (stub)
  * Hydrogenuine / Project DOCS
  * MIT License
  *
@@ -14,7 +14,7 @@
  */
 #include <stdio.h>
 int main(void) {
-    printf("EDP benchmark stub — not yet implemented.\n");
+    printf("EDP benchmark stub -- not yet implemented.\n");
     printf("See docs/protocol_limitations.md for planned performance targets.\n");
     return 0;
 }

@@ -1,6 +1,6 @@
 # EDP Threat Model
 
-**Status:** 0.1-DRAFT — not formally verified.
+**Status:** 0.1-DRAFT -- not formally verified.
 
 ## Scope
 
@@ -64,7 +64,7 @@ concrete hash function.
 
 ## Known gaps and unverified claims
 
-- **Source entropy quality:** The tier classification (Tier 0–3) is based on
+- **Source entropy quality:** The tier classification (Tier 0-3) is based on
   design assumptions, not measured entropy rates. IMU thermal noise, encoder
   jitter, and CAN FD timing need NIST SP 800-90B assessment to validate
   claimed entropy rates.

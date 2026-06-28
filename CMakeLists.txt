@@ -1,12 +1,12 @@
-# CMakeLists.txt — EDP (Entropy Distribution Protocol)
+# CMakeLists.txt -- EDP (Entropy Distribution Protocol)
 # Hydrogenuine / Project DOCS
 # MIT License
 #
 # Build targets:
-#   edpd          — EDP daemon (main deliverable)
-#   test_unit     — Unit tests
-#   test_security — Security property tests
-#   bench         — Performance benchmarks
+#   edpd          -- EDP daemon (main deliverable)
+#   test_unit     -- Unit tests
+#   test_security -- Security property tests
+#   bench         -- Performance benchmarks
 #
 # Cross-compile for RISC-V:
 #   cmake -B build-riscv \
@@ -43,8 +43,8 @@ else()
 endif()
 
 # ── Vendor dependencies ───────────────────────────────────────────
-# BLAKE3 — https://github.com/BLAKE3-team/BLAKE3/tree/master/c
-# Monocypher — https://monocypher.org/download
+# BLAKE3 -- https://github.com/BLAKE3-team/BLAKE3/tree/master/c
+# Monocypher -- https://monocypher.org/download
 #
 # Expected in vendor/:
 #   vendor/blake3.h

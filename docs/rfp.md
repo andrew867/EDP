@@ -1,5 +1,5 @@
 # Request for Proposals
-## EDP — Entropy Distribution Protocol
+## EDP: Entropy Distribution Protocol
 ### Reference Implementation for Embedded RISC-V Mesh Systems
 
 **Issuing Organization:** Hydrogenuine (Project DOCS)  
@@ -18,7 +18,7 @@ The intended deployment context is the DOCS (Distributed Organ Compute System) a
 
 EDP solves a real and unsolved problem: high-quality cryptographic randomness for embedded nodes in a closed-loop system with no internet connectivity, where every node simultaneously produces and consumes entropy from physical sensors and hardware TRNGs distributed across the mesh.
 
-This is an open research and engineering problem. A paper describing the closest prior art was published in March 2026 (arXiv:2603.09311). No production implementation meeting all DOCS requirements exists. This RFP invites implementers — from academic research groups to embedded security firms — to propose solutions.
+This is an open research and engineering problem. A paper describing the closest prior art was published in March 2026 (arXiv:2603.09311). No production implementation meeting all DOCS requirements exists. This RFP invites implementers -- from academic research groups to embedded security firms -- to propose solutions.
 
 ---
 
@@ -28,11 +28,11 @@ This is an open research and engineering problem. A paper describing the closest
 
 Cryptographic security in embedded systems depends on the quality of available randomness. The DOCS platform faces three compounding challenges:
 
-**Challenge 1 — Boot-time entropy starvation.** Each OCU boots from a cold or warm reset. The Linux kernel's entropy pool is empty or seeded only from weak sources (clock, MAC address). `getrandom()` blocks or returns weak bytes until sufficient entropy accumulates. This is a known, published problem (E-BOOT, IEEE 2020; "Welcome to the Entropics," IEEE 2013).
+**Challenge 1 -- Boot-time entropy starvation.** Each OCU boots from a cold or warm reset. The Linux kernel's entropy pool is empty or seeded only from weak sources (clock, MAC address). `getrandom()` blocks or returns weak bytes until sufficient entropy accumulates. This is a known, published problem (E-BOOT, IEEE 2020; "Welcome to the Entropics," IEEE 2013).
 
-**Challenge 2 — Closed-loop isolation.** The DOCS chassis operates without internet connectivity. Standard solutions that rely on network time, external QRNG services, or internet-based randomness beacons (drand, NIST Randomness Beacon) are not available.
+**Challenge 2 -- Closed-loop isolation.** The DOCS chassis operates without internet connectivity. Standard solutions that rely on network time, external QRNG services, or internet-based randomness beacons (drand, NIST Randomness Beacon) are not available.
 
-**Challenge 3 — Rich but untapped physical entropy.** A running android chassis is entropy-rich: IMU sensors (accelerometer, gyroscope) produce thermal noise; motor encoders produce timing jitter; CAN FD frames have timing variance; audio DSP has microphone thermal noise floor; FPGA fabric can host ring-oscillator TRNGs. None of this entropy is currently shared across OCU nodes.
+**Challenge 3 -- Rich but untapped physical entropy.** A running android chassis is entropy-rich: IMU sensors (accelerometer, gyroscope) produce thermal noise; motor encoders produce timing jitter; CAN FD frames have timing variance; audio DSP has microphone thermal noise floor; FPGA fabric can host ring-oscillator TRNGs. None of this entropy is currently shared across OCU nodes.
 
 ### 2.2 What Exists
 
@@ -40,9 +40,9 @@ Recent published solutions address parts of this problem but not the full requir
 
 | Solution | Gap |
 |---|---|
-| QEaaS — arXiv:2603.10274 (March 2026) | Client-server model; single entropy server is SPOF; no peer contribution |
-| RISC-V TEE entropy supply — arXiv:2603.09311 (March 2026) | Same model; TEE server → IoT fleet; no physical sensor sources; not fault-tolerant |
-| Remote QRNG via D-Bus — ACM TOPS 2026 | Single-host IPC only; not a network protocol |
+| QEaaS -- arXiv:2603.10274 (March 2026) | Client-server model; single entropy server is SPOF; no peer contribution |
+| RISC-V TEE entropy supply -- arXiv:2603.09311 (March 2026) | Same model; TEE server -> IoT fleet; no physical sensor sources; not fault-tolerant |
+| Remote QRNG via D-Bus -- ACM TOPS 2026 | Single-host IPC only; not a network protocol |
 | drand | Internet-dependent; threshold BLS is too heavyweight for E-core; not embedded |
 | haveged | Single-node only; no distribution |
 
@@ -67,10 +67,10 @@ The market for secure embedded AI compute is growing. A standardized, open, ligh
 
 Proposals must address all of the following:
 
-**D1 — EDP Protocol Specification**  
-A complete protocol specification document suitable for IETF Internet-Draft submission. Must cover: packet formats, key management, entropy source classification, conditioning algorithm, mixing algorithm, security model, and failure modes. Should build on or reference the Hydrogenuine EDP v0.1-DRAFT (provided as Attachment A to this RFP).
+**D1 -- EDP Protocol Specification**  
+A complete protocol specification document suitable for IETF Internet-Draft submission. Must cover: packet formats, key management, entropy source classification, conditioning algorithm, mixing algorithm, security model, and failure modes. Should build on or reference the EDP v0.1-DRAFT (provided as Attachment A to this RFP).
 
-**D2 — Reference Implementation**  
+**D2 -- Reference Implementation**  
 A production-quality C implementation of the EDP daemon targeting RISC-V (RV32IMC and RV64GC). Requirements:
 - Builds with GCC RISC-V toolchain, no external runtime dependencies beyond libc
 - Runs on Linux 5.x kernel (embedded config, musl libc acceptable)
@@ -79,7 +79,7 @@ A production-quality C implementation of the EDP daemon targeting RISC-V (RV32IM
 - Integrates with Linux getrandom / kernel entropy pool
 - Open source (MIT or Apache 2.0 license)
 
-**D3 — FPGA TRNG Core**  
+**D3 -- FPGA TRNG Core**  
 A synthesizable Verilog or VHDL ring-oscillator TRNG core targeting Lattice ECP5. Requirements:
 - Passes NIST SP 800-90B IID entropy estimation tests
 - Minimum 1 Mbit/s raw output rate
@@ -87,17 +87,17 @@ A synthesizable Verilog or VHDL ring-oscillator TRNG core targeting Lattice ECP5
 - Synthesizable with open toolchain (Yosys + nextpnr)
 - Open source (MIT, Apache 2.0, or CERN OHL)
 
-**D4 — Test Suite**  
+**D4 -- Test Suite**  
 An automated test suite covering all test cases in EDP Specification Section 12. Must include:
 - Unit tests for packet parsing, signature verification, entropy conditioning
 - Integration tests for 3-node minimum mesh on physical hardware or QEMU
 - Security tests including poisoning resistance and replay prevention
 - Performance benchmarks with CSV output
 
-**D5 — NIST SP 800-90B Entropy Estimation Report**  
+**D5 -- NIST SP 800-90B Entropy Estimation Report**  
 For each claimed entropy source (FPGA TRNG, IMU, encoder jitter, timing jitter), provide a formal entropy estimation report using the NIST SP 800-90B methodology. This is the primary quality assurance document for source tier assignment.
 
-**D6 — IETF Internet-Draft (optional but valued)**  
+**D6 -- IETF Internet-Draft (optional but valued)**  
 Submission of an individual Internet-Draft to the IETF ROLL (Routing Over Low-power and Lossy networks) working group or a new proposed working group. Hydrogenuine will support this submission but does not require it as a contract deliverable.
 
 ### 3.2 Out of Scope
@@ -189,11 +189,11 @@ Proposals that claim full compliance but provide no supporting benchmarks, entro
 Proposals should include the following sections (suggested page limits):
 
 1. **Executive Summary** (1 page): approach, key differentiators, prior work
-2. **Technical Approach** (4–8 pages): protocol design decisions, security proof sketch, implementation architecture
-3. **Entropy Source Analysis** (2–4 pages): which sources, estimated rates, conditioning method, tier justification
-4. **FPGA TRNG Design** (2–3 pages): ring oscillator architecture, synthesis results on ECP5, BIST design
-5. **Test Plan** (2–3 pages): how the test suite is structured, tooling, CI pipeline
-6. **Team and Prior Work** (1–2 pages): relevant publications, open source contributions, hardware experience
+2. **Technical Approach** (4-8 pages): protocol design decisions, security proof sketch, implementation architecture
+3. **Entropy Source Analysis** (2-4 pages): which sources, estimated rates, conditioning method, tier justification
+4. **FPGA TRNG Design** (2-3 pages): ring oscillator architecture, synthesis results on ECP5, BIST design
+5. **Test Plan** (2-3 pages): how the test suite is structured, tooling, CI pipeline
+6. **Team and Prior Work** (1-2 pages): relevant publications, open source contributions, hardware experience
 7. **Timeline and Milestones** (1 page): phased delivery schedule
 8. **Budget** (1 page): cost breakdown by deliverable
 9. **Open Source Commitment** (0.5 page): explicit statement of license, repository hosting, long-term maintenance intent
@@ -212,7 +212,7 @@ Prior art and related work published by proposers before this RFP is unaffected 
 
 ## 8. Attachments
 
-- **Attachment A:** Hydrogenuine EDP Specification v0.1-DRAFT (`hydrogenuine_edp_spec.md`)
+- **Attachment A:** EDP Specification v0.1-DRAFT (`hydrogenuine_edp_spec.md`)
 - **Attachment B:** Hydrogenuine DOCS Architecture Specification v0.1-DRAFT (`hydrogenuine_docs_spec.md`)
 - **Attachment C:** Relevant prior art bibliography (see Section 9)
 
@@ -238,7 +238,7 @@ Proposers should be familiar with the following:
 Questions regarding this RFP should be submitted in writing. Hydrogenuine will publish answers to all questions received, to maintain a level playing field.
 
 Contact: Project DOCS Technical Lead  
-Project: Hydrogenuine — github.com/hydrogenuine (placeholder)
+Project: Hydrogenuine -- github.com/hydrogenuine (placeholder)
 
 ---
 

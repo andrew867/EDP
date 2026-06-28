@@ -2,7 +2,7 @@
 
 All notable changes to EDP will be documented here.
 
-## [0.1-DRAFT] — 2026-06-28
+## [0.1-DRAFT] -- 2026-06-28
 
 Initial public research release. This is a protocol draft and reference
 implementation. Nothing here should be considered stable or production-ready.

@@ -1,5 +1,5 @@
 #!/bin/bash
-# test_integration.sh — EDP integration tests using QEMU RISC-V
+# test_integration.sh  -- EDP integration tests using QEMU RISC-V
 # Hydrogenuine / Project DOCS
 # MIT License
 #
@@ -159,7 +159,7 @@ test_int04_pool_diversity() {
             pass "INT-04"
         fi
     else
-        log "INT-04: Pool snapshot files not found (skipping — enable in edpd)"
+        log "INT-04: Pool snapshot files not found (skipping  -- enable in edpd)"
         pass "INT-04 (skipped)"
     fi
 }

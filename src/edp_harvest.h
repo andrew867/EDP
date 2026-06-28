@@ -1,5 +1,5 @@
 /*
- * edp_harvest.h — Entropy source implementations
+ * edp_harvest.h  -- Entropy source implementations
  * Hydrogenuine / Project DOCS
  * MIT License
  *
@@ -7,13 +7,13 @@
  * Platform-specific context is passed via the ctx pointer.
  *
  * Available built-in sources:
- *   edp_src_fpga_trng   — Lattice ECP5 ring-oscillator TRNG via MMIO
- *   edp_src_riscv_seed  — RISC-V Zkt Seed CSR
- *   edp_src_imu         — IMU LSB noise (ICM-42688-P via SPI)
- *   edp_src_encoder     — Motor encoder index pulse timing jitter
- *   edp_src_canfd       — CAN FD inter-frame timing jitter
- *   edp_src_timing      — HAVEGE-style execution timing jitter (fallback)
- *   edp_src_getrandom   — Linux getrandom() (bootstrap/fallback only)
+ *   edp_src_fpga_trng    -- Lattice ECP5 ring-oscillator TRNG via MMIO
+ *   edp_src_riscv_seed   -- RISC-V Zkt Seed CSR
+ *   edp_src_imu          -- IMU LSB noise (ICM-42688-P via SPI)
+ *   edp_src_encoder      -- Motor encoder index pulse timing jitter
+ *   edp_src_canfd        -- CAN FD inter-frame timing jitter
+ *   edp_src_timing       -- HAVEGE-style execution timing jitter (fallback)
+ *   edp_src_getrandom    -- Linux getrandom() (bootstrap/fallback only)
  */
 #pragma once
 
@@ -31,7 +31,7 @@ typedef struct {
 } edp_fpga_trng_ctx_t;
 
 /*
- * edp_src_fpga_trng_init() — populate an edp_source_t for the FPGA TRNG.
+ * edp_src_fpga_trng_init()  -- populate an edp_source_t for the FPGA TRNG.
  * base_addr: MMIO base of TRNG peripheral (see trng_top.v register map).
  */
 void edp_src_fpga_trng_init(edp_source_t *src, uintptr_t base_addr,
@@ -59,7 +59,7 @@ int  edp_src_seed_csr_harvest(uint8_t *buf, size_t len, void *ctx);
 
 typedef struct {
     int   spi_fd;           /* file descriptor for SPI device */
-    int   lsb_bits;         /* how many LSBs to extract per axis (typ. 3–4) */
+    int   lsb_bits;         /* how many LSBs to extract per axis (typ. 3-4) */
     int   axes;             /* number of axes to sample (typ. 6) */
     int   sample_count;     /* samples to take per harvest call */
 } edp_imu_ctx_t;

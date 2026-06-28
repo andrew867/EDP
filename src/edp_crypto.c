@@ -1,5 +1,5 @@
 /*
- * edp_crypto.c — Cryptographic primitives for EDP
+ * edp_crypto.c  -- Cryptographic primitives for EDP
  * Hydrogenuine / Project DOCS
  * MIT License
  */

@@ -1,5 +1,5 @@
 /*
- * test_unit.c — EDP unit tests
+ * test_unit.c  -- EDP unit tests
  * Hydrogenuine / Project DOCS
  * MIT License
  *
@@ -170,12 +170,12 @@ static void test_ed25519_verify_rejects_wrong_key(void)
 static void test_vn_balanced_output(void)
 {
     TEST("von_neumann output is approximately balanced");
-    /* Input: alternating 0x55 bytes = 01010101 — should be fully rejected */
+    /* Input: alternating 0x55 bytes = 01010101  -- should be fully rejected */
     uint8_t in[256]; memset(in, 0x55, sizeof(in));
     uint8_t out[256];
     size_t n = edp_von_neumann(in, sizeof(in), out, sizeof(out));
-    /* 0x55 = 01010101: all pairs are (0,1) or (1,0) — all pairs non-equal */
-    /* Every pair emits one bit → 4 bits per input byte → 128 bytes out */
+    /* 0x55 = 01010101: all pairs are (0,1) or (1,0)  -- all pairs non-equal */
+    /* Every pair emits one bit -> 4 bits per input byte -> 128 bytes out */
     ASSERT(n > 0);
     PASS();
 }
@@ -186,7 +186,7 @@ static void test_vn_rejects_constant(void)
     uint8_t in[64];  memset(in, 0x00, sizeof(in));
     uint8_t out[64];
     size_t n = edp_von_neumann(in, sizeof(in), out, sizeof(out));
-    /* 0x00 = 00000000: all pairs (0,0) → all discarded */
+    /* 0x00 = 00000000: all pairs (0,0) -> all discarded */
     ASSERT(n == 0);
     PASS();
 }
@@ -290,7 +290,7 @@ static void test_peer_sybil_delay(void)
     ASSERT(peer != NULL);
     ASSERT(peer->state == EDP_PEER_STATE_LEARNING);
 
-    /* Try to accept EC immediately — should be rejected (Sybil) */
+    /* Try to accept EC immediately  -- should be rejected (Sybil) */
     edp_pkt_ec_t ec = {0};
     ec.node_id   = 0x0000CAFE;
     ec.sequence  = 1;
@@ -475,7 +475,7 @@ static void test_staging_wrap(void)
     edp_staging_push(&s, chunk, sizeof(chunk));
     ASSERT(s.used == EDP_STAGING_CAPACITY);
 
-    /* Push more — overwrites oldest (ring buffer) */
+    /* Push more  -- overwrites oldest (ring buffer) */
     uint8_t more[16]; memset(more, 0xDD, sizeof(more));
     edp_staging_push(&s, more, sizeof(more));
     /* Used stays at capacity */
@@ -529,8 +529,8 @@ int main(void)
 
     printf("\n=== Results: %d/%d passed",
            tests_run - tests_failed, tests_run);
-    if (tests_failed == 0) printf(" — ALL PASS ===\n");
-    else printf(" — %d FAILED ===\n", tests_failed);
+    if (tests_failed == 0) printf("  -- ALL PASS ===\n");
+    else printf("  -- %d FAILED ===\n", tests_failed);
 
     return tests_failed == 0 ? 0 : 1;
 }

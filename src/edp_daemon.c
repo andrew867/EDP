@@ -1,5 +1,5 @@
 /*
- * edp_daemon.c — Main EDP daemon: event loop, timers, recv dispatch
+ * edp_daemon.c  -- Main EDP daemon: event loop, timers, recv dispatch
  * Hydrogenuine / Project DOCS
  * MIT License
  *

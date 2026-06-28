@@ -1,5 +1,5 @@
 /*
- * edp_types.h — EDP on-wire packet formats and internal types
+ * edp_types.h  -- EDP on-wire packet formats and internal types
  * Hydrogenuine / Project DOCS
  * MIT License
  */
@@ -42,7 +42,7 @@ typedef struct {
     uint32_t sequence;              /* monotonically increasing */
     uint64_t ptp_timestamp_ns;      /* 0 if PTP not available */
     uint16_t entropy_byte_count;    /* typically EDP_EC_ENTROPY_BYTES */
-    uint16_t health_score;          /* 0–1000 */
+    uint16_t health_score;          /* 0-1000 */
     uint8_t  entropy[EDP_EC_ENTROPY_BYTES];
     uint8_t  signature[EDP_SIG_SIZE]; /* Ed25519 over all preceding bytes */
 } edp_pkt_ec_t;

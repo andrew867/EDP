@@ -1,5 +1,5 @@
 /*
- * edp_mix.h — Entropy pool management and mixing
+ * edp_mix.h  -- Entropy pool management and mixing
  * Hydrogenuine / Project DOCS
  * MIT License
  */

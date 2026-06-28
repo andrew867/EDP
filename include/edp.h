@@ -1,12 +1,12 @@
 /*
- * edp.h — Entropy Distribution Protocol public API
+ * edp.h  -- Entropy Distribution Protocol public API
  * Hydrogenuine / Project DOCS
  * MIT License
  *
  * EDP is a peer-to-peer entropy augmentation protocol for closed-loop
  * embedded mesh networks. Every node is simultaneously a producer and
  * consumer of entropy. External contributions are BLAKE3-chained into
- * the local pool — they can only add entropy, never reduce it.
+ * the local pool  -- they can only add entropy, never reduce it.
  */
 #pragma once
 
@@ -68,13 +68,13 @@ typedef struct edp_source {
     char              name[EDP_SOURCE_NAME_LEN];
     edp_source_tier_t tier;
     /*
-     * harvest() — collect raw entropy bytes from this source.
+     * harvest()  -- collect raw entropy bytes from this source.
      * Called every HARVEST_INTERVAL_MS. Should be non-blocking.
      * Returns number of bytes written to buf, or -1 on error.
      */
     int  (*harvest)(uint8_t *buf, size_t len, void *ctx);
     void             *ctx;           /* platform-specific context */
-    uint16_t          health_score;  /* 0–1000; updated by daemon */
+    uint16_t          health_score;  /* 0-1000; updated by daemon */
     uint64_t          bits_total;    /* cumulative bits harvested */
     uint64_t          last_harvest;  /* monotonic ns timestamp */
     uint8_t           conditioning_key[32]; /* per-source BLAKE3 key */
@@ -108,7 +108,7 @@ typedef struct edp_config {
     uint16_t  port;                 /* override EDP_UDP_PORT if needed */
     int       ptp_enabled;          /* 1 if PTP is running on this node */
     /*
-     * inject_to_kernel() — feed mixed entropy into the OS entropy pool.
+     * inject_to_kernel()  -- feed mixed entropy into the OS entropy pool.
      * If NULL, EDP writes to /dev/urandom as fallback.
      * Signature: void fn(const uint8_t *bytes, size_t len)
      */
@@ -125,46 +125,46 @@ typedef struct edp_daemon edp_daemon_t;
 /* ── Public API ────────────────────────────────────────────────── */
 
 /*
- * edp_daemon_create() — Allocate and initialise an EDP daemon.
+ * edp_daemon_create()  -- Allocate and initialise an EDP daemon.
  * cfg must be fully populated. Returns NULL on error.
  */
 edp_daemon_t *edp_daemon_create(const edp_config_t *cfg);
 
 /*
- * edp_daemon_add_source() — Register an entropy source.
+ * edp_daemon_add_source()  -- Register an entropy source.
  * Must be called before edp_daemon_run(). Up to EDP_MAX_SOURCES.
  * Returns 0 on success, -1 if table is full.
  */
 int edp_daemon_add_source(edp_daemon_t *d, const edp_source_t *src);
 
 /*
- * edp_daemon_run() — Enter the main event loop. Blocks until
+ * edp_daemon_run()  -- Enter the main event loop. Blocks until
  * edp_daemon_stop() is called from a signal handler or another thread.
  */
 int edp_daemon_run(edp_daemon_t *d);
 
 /*
- * edp_daemon_stop() — Signal the daemon to exit cleanly.
+ * edp_daemon_stop()  -- Signal the daemon to exit cleanly.
  * Safe to call from a signal handler.
  */
 void edp_daemon_stop(edp_daemon_t *d);
 
 /*
- * edp_daemon_destroy() — Free all resources.
+ * edp_daemon_destroy()  -- Free all resources.
  * Must be called after edp_daemon_run() returns.
  */
 void edp_daemon_destroy(edp_daemon_t *d);
 
 /*
- * edp_generate_identity() — Generate a fresh Ed25519 keypair.
+ * edp_generate_identity()  -- Generate a fresh Ed25519 keypair.
  * pub must be EDP_PUBKEY_SIZE bytes, priv EDP_PRIVKEY_SIZE bytes.
- * Uses getrandom() for key material — call only after boot entropy
+ * Uses getrandom() for key material  -- call only after boot entropy
  * is sufficient (i.e., after the kernel pool is initialised).
  */
 int edp_generate_identity(uint8_t *pub, uint8_t *priv);
 
 /*
- * edp_get_stats() — Snapshot of daemon statistics.
+ * edp_get_stats()  -- Snapshot of daemon statistics.
  */
 typedef struct {
     uint32_t peers_online;

@@ -1,5 +1,5 @@
 /*
- * edp_harvest.c — Entropy source implementations
+ * edp_harvest.c  -- Entropy source implementations
  * Hydrogenuine / Project DOCS
  * MIT License
  */
@@ -55,7 +55,7 @@ int edp_src_fpga_trng_harvest(uint8_t *buf, size_t len, void *vctx)
     /* Check BIST status */
     uint32_t status = *ctx->status_reg;
     if (status & 0x4) {
-        /* DEAD — TRNG has failed self-test */
+        /* DEAD  -- TRNG has failed self-test */
         return -1;
     }
 
@@ -95,7 +95,7 @@ int edp_src_seed_csr_harvest(uint8_t *buf, size_t len, void *vctx)
         uint32_t polls = 0;
 
         /*
-         * csrrs a0, seed, x0 — read the Seed CSR.
+         * csrrs a0, seed, x0  -- read the Seed CSR.
          * Status is in bits [31:30]; data is in bits [15:0].
          * Encoding: ES16=0b11, BIST=0b10, WAIT=0b01, DEAD=0b00
          *

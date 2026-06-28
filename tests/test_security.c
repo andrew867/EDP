@@ -1,11 +1,11 @@
 /*
- * test_security.c — EDP security property tests
+ * test_security.c  -- EDP security property tests
  * Hydrogenuine / Project DOCS
  * MIT License
  *
  * Tests the core security guarantees:
  *   SEC-01: Poisoning resistance (adversarial EC cannot weaken pool)
- *   SEC-02: Pool independence (different local sources → different pools)
+ *   SEC-02: Pool independence (different local sources -> different pools)
  *   SEC-03: Forward secrecy (extraction re-keys the pool)
  *   SEC-04: Sybil delay enforced
  *   SEC-05: Spoofed HELLO rejected
@@ -33,7 +33,7 @@ static int tests_run = 0, tests_failed = 0;
 /* ── Entropy quality helpers ───────────────────────────────────── */
 
 /*
- * monobit_test() — NIST SP 800-22 Test 1 (simplified).
+ * monobit_test()  -- NIST SP 800-22 Test 1 (simplified).
  * Returns 1 if the proportion of 1-bits is within [0.45, 0.55].
  * For a 256-byte sample this is a very coarse check.
  */
@@ -49,7 +49,7 @@ static int monobit_test(const uint8_t *buf, size_t len)
 }
 
 /*
- * byte_diversity() — count distinct byte values in a buffer.
+ * byte_diversity()  -- count distinct byte values in a buffer.
  * A random 256-byte buffer should have close to 256 distinct values.
  */
 static int byte_diversity(const uint8_t *buf, size_t len)
@@ -95,7 +95,7 @@ static void test_sec01_poisoning_resistance(void)
 
 static void test_sec02_pool_independence(void)
 {
-    TEST("SEC-02: Different seeds → independent pool outputs");
+    TEST("SEC-02: Different seeds -> independent pool outputs");
 
     edp_pool_t pool_a, pool_b;
     uint8_t seed_a[32]; memset(seed_a, 0xAA, sizeof(seed_a));
@@ -116,7 +116,7 @@ static void test_sec02_pool_independence(void)
     edp_pool_extract(&pool_a, out_a, sizeof(out_a));
     edp_pool_extract(&pool_b, out_b, sizeof(out_b));
 
-    /* Different initial seeds → different outputs even with same EC contributions */
+    /* Different initial seeds -> different outputs even with same EC contributions */
     ASSERT(memcmp(out_a, out_b, 32) != 0);
     PASS();
 }
@@ -201,13 +201,13 @@ static void test_sec05_spoofed_hello_rejected(void)
     edp_build_hello(&hello, 0x01, pub_a, priv_a, 0x1, EDP_CAP_SENSOR_ARRAY, 1, fw);
     uint8_t buf[sizeof(hello)]; memcpy(buf, &hello, sizeof(buf));
 
-    /* Verify with key A → should pass */
+    /* Verify with key A -> should pass */
     ASSERT(edp_verify_hello_raw(buf, sizeof(buf), pub_a) == 0);
 
-    /* Verify with key B → should fail */
+    /* Verify with key B -> should fail */
     ASSERT(edp_verify_hello_raw(buf, sizeof(buf), pub_b) != 0);
 
-    /* Tamper with the pubkey field in the packet → signature mismatch */
+    /* Tamper with the pubkey field in the packet -> signature mismatch */
     memcpy(buf + offsetof(edp_pkt_hello_t, pubkey), pub_b, 32);
     ASSERT(edp_verify_hello_raw(buf, sizeof(buf), pub_b) != 0);
     PASS();
@@ -329,8 +329,8 @@ int main(void)
 
     printf("\n=== Results: %d/%d passed",
            tests_run - tests_failed, tests_run);
-    if (tests_failed == 0) printf(" — ALL PASS ===\n");
-    else printf(" — %d FAILED ===\n", tests_failed);
+    if (tests_failed == 0) printf("  -- ALL PASS ===\n");
+    else printf("  -- %d FAILED ===\n", tests_failed);
 
     return tests_failed == 0 ? 0 : 1;
 }

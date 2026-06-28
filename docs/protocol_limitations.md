@@ -33,7 +33,7 @@ interface. Integration with RISC-V bare-metal targets is not implemented.
 
 **Port 4086 is not IANA-assigned.** IANA lists 4086/tcp as Reserved. EDP uses
 4086 as an aspirational default (homage to RFC 4086 on randomness requirements).
-Any deployment should either use a port in the dynamic/private range (49152–65535)
+Any deployment should either use a port in the dynamic/private range (49152-65535)
 or obtain a formal IANA assignment.
 
 **UDP multicast has no transport encryption.** Packet contents beyond the 64-byte
@@ -58,7 +58,7 @@ a reliable entropy guarantee.
 PCB layout, and operating conditions. Measure with NIST SP 800-90B before
 assigning to a trust tier.
 
-**Encoder jitter requires measurement.** Similar caveat. Claimed ~150–200 bits/s
+**Encoder jitter requires measurement.** Similar caveat. Claimed ~150-200 bits/s
 is an estimate. High-quality encoders with clean power may produce much less jitter
 than assumed.
 

@@ -1,5 +1,5 @@
 /*
- * edp_peer.h — Peer table management
+ * edp_peer.h  -- Peer table management
  * Hydrogenuine / Project DOCS
  * MIT License
  */

@@ -1,4 +1,4 @@
-# RFP Response — HYD-RFP-2026-001
+# RFP Response -- HYD-RFP-2026-001
 ## Entropy Distribution Protocol (EDP)
 ### Complete Implementation Proposal
 
@@ -6,36 +6,36 @@
 **Submitted by:** Hydrogenuine Core Engineering (self-response / internal implementation track)  
 **Date:** 2026-06-18  
 **Reference:** HYD-RFP-2026-001  
-**Deliverable set:** Full implementation — protocol spec, C daemon, FPGA TRNG, test suite
+**Deliverable set:** Full implementation -- protocol spec, C daemon, FPGA TRNG, test suite
 
 ---
 
-## Section 1 — Executive Summary
+## Section 1 -- Executive Summary
 
 This response proposes and delivers a complete reference implementation of EDP, the Entropy Distribution Protocol, targeting the DOCS OCU mesh architecture. The implementation is self-funded and self-executed as an internal Hydrogenuine deliverable.
 
-The core technical position: EDP is an entropy-augmenting peer mesh protocol. The security guarantee is simple and strong — a node's entropy can only increase from external contributions, never decrease. This is enforced cryptographically by the BLAKE3 chaining construction, not by policy or trust.
+The core technical position: EDP is an entropy-augmenting peer mesh protocol. The security guarantee is simple and strong -- a node's entropy can only increase from external contributions, never decrease. This is enforced cryptographically by the BLAKE3 chaining construction, not by policy or trust.
 
 All deliverables are open source (MIT). A reference C daemon, FPGA TRNG Verilog core, and full test suite are provided alongside this document. An IETF individual Internet-Draft is a follow-on target for Q1 2027.
 
 **Differentiators over existing work:**
 - Only peer-to-peer embedded mesh entropy protocol (all published alternatives are client-server)
-- Physical sensor entropy (IMU, encoder jitter) as first-class Tier 2 sources — novel
-- FPGA TRNG integration with hardware attestation — novel for embedded mesh
+- Physical sensor entropy (IMU, encoder jitter) as first-class Tier 2 sources -- novel
+- FPGA TRNG integration with hardware attestation -- novel for embedded mesh
 - Formally poisoning-resistant by construction: external entropy XOR-chains, never replaces
-- Targets RV32IMC E-core at 200 MHz with < 64 KB RAM — smaller than any published equivalent
+- Targets RV32IMC E-core at 200 MHz with < 64 KB RAM -- smaller than any published equivalent
 
 ---
 
-## Section 2 — Technical Approach
+## Section 2 -- Technical Approach
 
 ### 2.1 Architecture Decision: Why Peer Mesh, Not Server
 
 Every published 2026 solution (QEaaS arXiv:2603.10274, RISC-V TEE arXiv:2603.09311) uses a single trusted entropy server. This is appropriate for generic IoT fleets but wrong for DOCS because:
 
-1. DOCS is a fault-tolerant mesh — a single entropy server is a SPOF incompatible with the fault model
+1. DOCS is a fault-tolerant mesh -- a single entropy server is a SPOF incompatible with the fault model
 2. Every OCU in DOCS has rich physical entropy sources that are wasted in a client model
-3. Boot-time starvation in DOCS happens on multiple nodes simultaneously — a server that also just booted has the same problem
+3. Boot-time starvation in DOCS happens on multiple nodes simultaneously -- a server that also just booted has the same problem
 
 The peer mesh model means: the node with the most entropy (typically the torso OCU with the longest uptime and the FPGA TRNG) naturally becomes the strongest contributor, but any node can contribute, and the mesh continues if any node fails.
 
@@ -102,11 +102,11 @@ BLAKE3 is chosen over SHA-3 or SHA-256 for three reasons:
 
 Monocypher is used for Ed25519 (sign/verify) and X25519 (future key agreement). Monocypher is ~2000 lines of portable C, no dynamic allocation, no external dependencies, and compiles for RV32IMC. Verified against Wycheproof test vectors.
 
-Ed25519 sign latency on RV32IMC at 200 MHz: estimated 8–15 ms based on Monocypher benchmarks on comparable cores. This is within budget for a 1-second broadcast cycle.
+Ed25519 sign latency on RV32IMC at 200 MHz: estimated 8-15 ms based on Monocypher benchmarks on comparable cores. This is within budget for a 1-second broadcast cycle.
 
 ---
 
-## Section 3 — Entropy Source Analysis
+## Section 3 -- Entropy Source Analysis
 
 ### 3.1 Source Inventory by OCU Class
 
@@ -126,15 +126,15 @@ All OCUs have FPGA fabric (ECP5-25F), making Tier 0 TRNG universally available.
 
 Architecture: two free-running ring oscillators of prime chain lengths (11 and 13 inverter stages). XOR of their outputs is sampled by a third independent clock domain. The phase jitter between oscillators is the entropy source.
 
-Expected entropy: thermal jitter in 65nm and below CMOS is approximately 0.1–1 ps RMS per stage. At 100 MHz sample rate, with ~10 stages of jitter accumulation per bit, expected raw entropy: 0.3–0.8 bits/bit. After BLAKE3 conditioning, output is full entropy (NIST SP 800-90B compliant).
+Expected entropy: thermal jitter in 65nm and below CMOS is approximately 0.1-1 ps RMS per stage. At 100 MHz sample rate, with ~10 stages of jitter accumulation per bit, expected raw entropy: 0.3-0.8 bits/bit. After BLAKE3 conditioning, output is full entropy (NIST SP 800-90B compliant).
 
-Raw output rate: Lattice ECP5-25F at 100 MHz clock → approximately 50–100 Mbit/s raw FIFO fill. After conditioning, deliver 32 bytes every 10ms to EDP daemon = 25.6 Kbit/s conditioned entropy. More than sufficient.
+Raw output rate: Lattice ECP5-25F at 100 MHz clock -> approximately 50-100 Mbit/s raw FIFO fill. After conditioning, deliver 32 bytes every 10ms to EDP daemon = 25.6 Kbit/s conditioned entropy. More than sufficient.
 
 **IMU Sensor Noise (Tier 2)**
 
 Source: LSBs of 3-axis accelerometer and 3-axis gyroscope readings at 200 Hz output data rate.
 
-At rest, accelerometer LSB noise on a typical MEMS device (e.g., ICM-42688-P): ~1.2 mg RMS. At 12-bit ADC resolution, the bottom 3–4 bits are dominated by thermal noise. At 200 Hz: 6 axes × 3 noisy bits × 200 Hz = 3,600 bits/s raw. After von Neumann corrector (50% efficiency): ~1,800 bits/s.
+At rest, accelerometer LSB noise on a typical MEMS device (e.g., ICM-42688-P): ~1.2 mg RMS. At 12-bit ADC resolution, the bottom 3-4 bits are dominated by thermal noise. At 200 Hz: 6 axes × 3 noisy bits × 200 Hz = 3,600 bits/s raw. After von Neumann corrector (50% efficiency): ~1,800 bits/s.
 
 During motion: entropy rate increases as vibration and motion add to thermal noise.
 
@@ -142,35 +142,35 @@ Conditioning: von Neumann + BLAKE3. Estimation method: NIST SP 800-90B non-IID t
 
 **Motor Encoder Jitter (Tier 2)**
 
-Source: timing jitter on the index pulse of a quadrature encoder. At 3000 RPM with 1000 CPR encoder, index pulses arrive every 20ms. Timing jitter: 10–100 ns from motor cogging and Hall effect noise. Captured via FPGA timer at 1ns resolution.
+Source: timing jitter on the index pulse of a quadrature encoder. At 3000 RPM with 1000 CPR encoder, index pulses arrive every 20ms. Timing jitter: 10-100 ns from motor cogging and Hall effect noise. Captured via FPGA timer at 1ns resolution.
 
-Entropy estimate: ~10 bits per pulse × 50 pulses/s = 500 bits/s. Conditional on knowing motor speed: perhaps 3–4 bits/pulse → 150–200 bits/s. Conservative and useful.
+Entropy estimate: ~10 bits per pulse × 50 pulses/s = 500 bits/s. Conditional on knowing motor speed: perhaps 3-4 bits/pulse -> 150-200 bits/s. Conservative and useful.
 
 **CAN FD Frame Timing Jitter (Tier 2)**
 
-Source: inter-frame arrival time variance measured at the FPGA CAN FD controller. CAN FD at 5 Mbit/s, typical frame every 50–200 µs. Timing variance from clock jitter, bus capacitance, and propagation: ~10–50 ns RMS.
+Source: inter-frame arrival time variance measured at the FPGA CAN FD controller. CAN FD at 5 Mbit/s, typical frame every 50-200 µs. Timing variance from clock jitter, bus capacitance, and propagation: ~10-50 ns RMS.
 
 At 64-bit timer resolution: ~6 bits of jitter per frame × ~5000 frames/s = 30,000 bits/s raw, but highly correlated. After decorrelation (first-difference + von Neumann): ~500 bits/s estimated.
 
 **Timing Jitter / HAVEGE (Tier 3, fallback)**
 
-Available on any RISC-V core with `rdcycle`. Used only when no Tier 0/1/2 sources are available. Expected rate: 100–500 bits/s.
+Available on any RISC-V core with `rdcycle`. Used only when no Tier 0/1/2 sources are available. Expected rate: 100-500 bits/s.
 
 ### 3.3 Source Conditioning Pipeline
 
 ```
-Raw bytes → von Neumann corrector (for bit-level sources)
-         → BLAKE3_keyed(raw, source_key)   [conditioning]
-         → staging buffer
-         → BLAKE3(staging_prev || new_chunk) [accumulation]
-         → EC packet entropy field (64 bytes per broadcast)
+Raw bytes -> von Neumann corrector (for bit-level sources)
+         -> BLAKE3_keyed(raw, source_key)   [conditioning]
+         -> staging buffer
+         -> BLAKE3(staging_prev || new_chunk) [accumulation]
+         -> EC packet entropy field (64 bytes per broadcast)
 ```
 
 Each source has a unique conditioning key derived from: `BLAKE3(node_id || source_name || boot_count)`. This ensures even identical hardware produces different conditioning keys.
 
 ---
 
-## Section 4 — FPGA TRNG Design
+## Section 4 -- FPGA TRNG Design
 
 The FPGA TRNG is implemented in Verilog for Lattice ECP5, synthesizable with Yosys + nextpnr (Project Trellis). Source file: `edp/fpga/trng_top.v`.
 
@@ -178,7 +178,7 @@ The FPGA TRNG is implemented in Verilog for Lattice ECP5, synthesizable with Yos
 
 ```
 Ring Oscillator A (11 stages)  ─────┐
-                                    XOR → [Sample FF @ CLK_C] → FIFO → MMIO
+                                    XOR -> [Sample FF @ CLK_C] -> FIFO -> MMIO
 Ring Oscillator B (13 stages)  ─────┘
 
 CLK_C: independent free-running RC oscillator (ECP5 OSCi primitive, ~128 MHz)
@@ -208,7 +208,7 @@ Simple memory-mapped interface at base address `FPGA_TRNG_BASE` (configured via 
 
 ---
 
-## Section 5 — Test Plan
+## Section 5 -- Test Plan
 
 Full test implementation is in `edp/tests/`. All tests run under CTest via CMake.
 
@@ -261,7 +261,7 @@ Pass criteria per spec Section 12.1 (SRC-01 through SRC-07).
 
 ---
 
-## Section 6 — Team and Prior Work
+## Section 6 -- Team and Prior Work
 
 **Hydrogenuine Core Engineering** is the team developing the DOCS OCU architecture. Directly relevant prior work:
 
@@ -273,24 +273,24 @@ Relevant external work surveyed: arXiv:2603.09311 (RISC-V TEE entropy), arXiv:26
 
 ---
 
-## Section 7 — Timeline and Milestones
+## Section 7 -- Timeline and Milestones
 
 | Phase | Duration | Deliverable |
 |---|---|---|
-| **P0 — Core daemon** | Weeks 1–3 | edp_daemon running on QEMU RV64, EC broadcast/receive, BLAKE3 mixing, Ed25519, peer table |
-| **P1 — FPGA TRNG** | Weeks 2–4 | trng_top.v synthesizing on ECP5, BIST passing, MMIO driver integrated into daemon |
-| **P2 — Sensor sources** | Weeks 4–6 | IMU, encoder, CAN FD timing sources integrated; von Neumann + BLAKE3 conditioning |
-| **P3 — Unit test suite** | Weeks 3–5 | All unit and security tests passing under QEMU and on K230 dev board |
-| **P4 — Physical 3-node mesh** | Weeks 6–9 | Integration test on 3 OCU prototype nodes; INT-01 through INT-07 passing |
-| **P5 — NIST 90B estimation** | Weeks 8–10 | Formal entropy estimation reports for all Tier 0/1/2 sources |
-| **P6 — Performance validation** | Weeks 9–11 | All PERF tests passing; daemon within resource budget on E-core |
-| **P7 — Documentation + IETF draft** | Weeks 10–14 | Final spec update, IETF individual draft submitted |
+| **P0 -- Core daemon** | Weeks 1-3 | edp_daemon running on QEMU RV64, EC broadcast/receive, BLAKE3 mixing, Ed25519, peer table |
+| **P1 -- FPGA TRNG** | Weeks 2-4 | trng_top.v synthesizing on ECP5, BIST passing, MMIO driver integrated into daemon |
+| **P2 -- Sensor sources** | Weeks 4-6 | IMU, encoder, CAN FD timing sources integrated; von Neumann + BLAKE3 conditioning |
+| **P3 -- Unit test suite** | Weeks 3-5 | All unit and security tests passing under QEMU and on K230 dev board |
+| **P4 -- Physical 3-node mesh** | Weeks 6-9 | Integration test on 3 OCU prototype nodes; INT-01 through INT-07 passing |
+| **P5 -- NIST 90B estimation** | Weeks 8-10 | Formal entropy estimation reports for all Tier 0/1/2 sources |
+| **P6 -- Performance validation** | Weeks 9-11 | All PERF tests passing; daemon within resource budget on E-core |
+| **P7 -- Documentation + IETF draft** | Weeks 10-14 | Final spec update, IETF individual draft submitted |
 
 Total: 14 weeks from start to IETF draft submission.
 
 ---
 
-## Section 8 — Budget
+## Section 8 -- Budget
 
 Internal development. No external contract cost.
 
@@ -305,7 +305,7 @@ External costs:
 
 ---
 
-## Section 9 — Open Source Commitment
+## Section 9 -- Open Source Commitment
 
 All deliverables are released under the **MIT License**.
 

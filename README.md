@@ -1,10 +1,12 @@
-# EDP — Entropy Distribution Protocol
+# EDP: Entropy Distribution Protocol
+
+![CI](https://github.com/andrew867/EDP/actions/workflows/ci.yml/badge.svg)
 
 > **Status: 0.1-DRAFT / research prototype / not production crypto**
 
 EDP is a draft peer-to-peer entropy augmentation protocol for embedded systems.
 Each node keeps its own local entropy pool. Remote contributions are authenticated,
-conditioned, and mixed into that pool — they never replace local entropy. The goal
+conditioned, and mixed into that pool -- they never replace local entropy. The goal
 is to make a mesh of constrained devices less dependent on any single entropy service,
 while keeping the failure mode boring: a bad peer can fail to help, but shouldn't
 be able to make a healthy local pool worse.
@@ -40,8 +42,8 @@ a research starting point.
 
 Embedded systems with no hardware TRNG are common. During early boot, before the
 network is up and before enough events have accumulated, the local entropy pool can
-be thin. When you have a mesh of such devices — robot limbs, sensor nodes, edge
-compute units — they all have this problem at the same time, from the same power-on
+be thin. When you have a mesh of such devices -- robot limbs, sensor nodes, edge
+compute units -- they all have this problem at the same time, from the same power-on
 event.
 
 EDP lets them pool what they have. Each node mixes contributions from its peers into
@@ -60,7 +62,7 @@ peer.
 | Reference | Approach | Gap |
 |-----------|----------|-----|
 | arXiv:2603.09311 | IoT entropy via RISC-V TEE server | Client-server only |
-| arXiv:2603.10274 / QEaaS | QRNG → ESP32 clients over PQC channels | Expensive QRNG hardware required |
+| arXiv:2603.10274 / QEaaS | QRNG to ESP32 clients over PQC channels | Expensive QRNG hardware required |
 | ACM 10.1145/3799895 | Remote QRNG via D-Bus | Single host, not networked |
 | drand | Distributed randomness beacon (BLS threshold sigs) | Internet-scale infrastructure, not embedded |
 | Linux `/dev/random` | Kernel entropy pool from hardware events | Single-host; EDP complements, not replaces |
@@ -122,9 +124,9 @@ Each node:
 
 | Tier | Source | Claimed rate (unverified) | Notes |
 |------|--------|--------------------------|-------|
-| 0 | FPGA ring-oscillator TRNG | >1 Mbit/s | Prototype — needs measurement |
+| 0 | FPGA ring-oscillator TRNG | >1 Mbit/s | Prototype -- needs measurement |
 | 1 | RISC-V `seed` CSR (Zkt extension) | ~1 Mbit/s | Hardware-attested; K230 specific |
-| 2 | Sensor physical noise (IMU, encoder, CAN FD) | ~1–2 Kbit/s est. | Requires NIST SP 800-90B assessment |
+| 2 | Sensor physical noise (IMU, encoder, CAN FD) | ~1-2 Kbit/s est. | Requires NIST SP 800-90B assessment |
 | 3 | HAVEGE timing jitter | Variable | Software-only; weakest tier |
 
 All rates are design estimates. None have been formally measured. Do not use tier
@@ -136,7 +138,7 @@ assignments as security guarantees without independent entropy measurement.
 
 ### Prerequisites
 
-- CMake ≥ 3.16
+- CMake >= 3.16
 - GCC or Clang (C11)
 - Vendored dependencies: BLAKE3 1.5.4, Monocypher 4.0.2
 
@@ -177,10 +179,10 @@ ctest --test-dir build -V
 ```
 
 This runs:
-- **unit** — 22 unit tests (BLAKE3 KATs, pool mixing, peer logic, staging buffer)
-- **security** — 8 security property tests (poisoning resistance, Sybil delay, rate
+- **unit** -- 22 unit tests (BLAKE3 KATs, pool mixing, peer logic, staging buffer)
+- **security** -- 8 security property tests (poisoning resistance, Sybil delay, rate
   limiting, forward secrecy, tier fraud detection)
-- **integration** — 3-node loopback mesh test (Linux only, requires `ip` and multicast
+- **integration** -- 3-node loopback mesh test (Linux only, requires `ip` and multicast
   route on loopback)
 
 If vendor fetch is unavailable (no internet), integration tests will not build.
@@ -214,7 +216,7 @@ Key issues:
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT -- see [LICENSE](LICENSE).
 
 Vendored dependencies (BLAKE3, Monocypher) have their own licenses; see [NOTICE.md](NOTICE.md).
 
@@ -222,10 +224,10 @@ Vendored dependencies (BLAKE3, Monocypher) have their own licenses; see [NOTICE.
 
 ## References
 
-- RFC 4086 — Eastlake et al., "Randomness Requirements for Security," IETF, 2005
-- NIST SP 800-90B — Turan et al., "Entropy Sources for Random Bit Generation," 2018
-- arXiv:2603.09311 — RISC-V TEE entropy supply for IoT
-- arXiv:2603.10274 — QEaaS: QRNG entropy distribution over PQC channels
-- ACM 10.1145/3799895 — Remote QRNG via D-Bus
+- RFC 4086 -- Eastlake et al., "Randomness Requirements for Security," IETF, 2005
+- NIST SP 800-90B -- Turan et al., "Entropy Sources for Random Bit Generation," 2018
+- arXiv:2603.09311 -- RISC-V TEE entropy supply for IoT
+- arXiv:2603.10274 -- QEaaS: QRNG entropy distribution over PQC channels
+- ACM 10.1145/3799895 -- Remote QRNG via D-Bus
 - BLAKE3: https://github.com/BLAKE3-team/BLAKE3
 - Monocypher: https://monocypher.org

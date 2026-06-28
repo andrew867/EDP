@@ -1,7 +1,7 @@
 #!/bin/bash
-# fetch_vendors.sh — Download vendored dependencies for EDP
+# fetch_vendors.sh -- Download vendored dependencies for EDP
 # Run once from the edp/ directory before building.
-# Hydrogenuine / Project DOCS — MIT License
+# Hydrogenuine / Project DOCS -- MIT License
 
 set -euo pipefail
 
@@ -15,14 +15,14 @@ curl -fsSL "$BLAKE3_BASE/blake3.h"          -o "$VENDOR_DIR/blake3.h"
 curl -fsSL "$BLAKE3_BASE/blake3.c"          -o "$VENDOR_DIR/blake3.c"
 curl -fsSL "$BLAKE3_BASE/blake3_portable.c" -o "$VENDOR_DIR/blake3_portable.c"
 curl -fsSL "$BLAKE3_BASE/blake3_impl.h"     -o "$VENDOR_DIR/blake3_impl.h"
-echo "  BLAKE3 ${BLAKE3_VERSION} → vendor/"
+echo "  BLAKE3 ${BLAKE3_VERSION} -> vendor/"
 
 echo "Fetching Monocypher..."
 MONO_VERSION="4.0.2"
 MONO_BASE="https://raw.githubusercontent.com/LoupVaillant/Monocypher/${MONO_VERSION}/src"
 curl -fsSL "$MONO_BASE/monocypher.h" -o "$VENDOR_DIR/monocypher.h"
 curl -fsSL "$MONO_BASE/monocypher.c" -o "$VENDOR_DIR/monocypher.c"
-echo "  Monocypher ${MONO_VERSION} → vendor/"
+echo "  Monocypher ${MONO_VERSION} -> vendor/"
 
 echo "Vendor fetch complete."
 echo "Licenses:"

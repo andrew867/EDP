@@ -2,7 +2,7 @@
 // Treat as a reference sketch. Entropy output quality must be measured before production use.
 
 /*
- * trng_top.v — TRNG top-level with memory-mapped register interface
+ * trng_top.v  -- TRNG top-level with memory-mapped register interface
  * Hydrogenuine / Project DOCS
  * MIT License
  *
@@ -34,7 +34,7 @@ module trng_top (
     input  wire        reg_rd,      /* 1 = read cycle */
     input  wire [31:0] reg_wdata,
     output reg  [31:0] reg_rdata,
-    /* TRNG sampling clock (async — use ECP5 OSCi or PLL output) */
+    /* TRNG sampling clock (async  -- use ECP5 OSCi or PLL output) */
     input  wire        clk_s
 );
 

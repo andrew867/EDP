@@ -15,7 +15,7 @@ If you can measure this, that's the most valuable thing you could contribute rig
 **Measurement:** Run the FPGA TRNG on real hardware and share NIST SP 800-90B
 results. Same for IMU/encoder/CAN timing sources. We need data, not models.
 
-**Protocol review:** Read `docs/edp_spec.md` and look for protocol-level issues —
+**Protocol review:** Read `docs/edp_spec.md` and look for protocol-level issues --
 especially around the Sybil delay, rate limiting, and the peer trust model.
 
 **Code review:** The C daemon is a prototype. Review `src/edp_peer.c` and

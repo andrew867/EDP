@@ -1,5 +1,5 @@
 /*
- * edp_peer.c — Peer table management
+ * edp_peer.c  -- Peer table management
  * Hydrogenuine / Project DOCS
  * MIT License
  */
@@ -93,7 +93,7 @@ edp_peer_t *edp_peer_upsert_hello(edp_peer_table_t *t,
 }
 
 /*
- * edp_peer_check_ec() — Validate an incoming EC from a peer.
+ * edp_peer_check_ec()  -- Validate an incoming EC from a peer.
  * Returns EDP_PEER_ACCEPT on success, or EDP_PEER_DROP_* error code.
  */
 edp_peer_ec_result_t edp_peer_check_ec(edp_peer_table_t *t,

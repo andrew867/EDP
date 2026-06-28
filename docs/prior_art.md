@@ -27,27 +27,27 @@ rather than loss of entropy service.
 
 ## Foundational references
 
-**RFC 4086** — Eastlake, Schiller, Crocker, "Randomness Requirements for Security,"
+**RFC 4086** -- Eastlake, Schiller, Crocker, "Randomness Requirements for Security,"
 IETF, June 2005. The canonical reference for why entropy matters in security
 systems and how to think about entropy sources. Port 4086 is an homage to this
 document.
 
-**NIST SP 800-90B** — Turan et al., "Recommendation for the Entropy Sources Used
+**NIST SP 800-90B** -- Turan et al., "Recommendation for the Entropy Sources Used
 for Random Bit Generation," NIST, January 2018. The methodology for measuring and
 validating entropy sources. EDP's Tier classification is designed to be consistent
 with 800-90B terminology, but no formal 800-90B assessments of EDP sources have
 been conducted.
 
-**NIST SP 800-90A** — Barker, Kelsey, "Recommendation for Random Number Generation
+**NIST SP 800-90A** -- Barker, Kelsey, "Recommendation for Random Number Generation
 Using Deterministic Random Bit Generators." Provides context for CSPRNG design;
 EDP's pool is not itself a DRBG in the 800-90A sense.
 
-**BLAKE3** — O'Connor et al., "BLAKE3: One Function, Fast Everywhere," 2020.
+**BLAKE3** -- O'Connor et al., "BLAKE3: One Function, Fast Everywhere," 2020.
 The hash function used for all EDP pool mixing and entropy conditioning. Chosen
 for speed on RISC-V (~10× SHA-256), simplicity (~1400 lines portable C), and
 the keyed and XOF modes it provides.
 
-**Monocypher** — Dubedat, "Monocypher: Easy to Use, Easy to Deploy Cryptography."
+**Monocypher** -- Dubedat, "Monocypher: Easy to Use, Easy to Deploy Cryptography."
 Used for Ed25519 node identity. Chosen for its small footprint (~2000 lines portable
 C), no dynamic allocation, and BSD-2-Clause license.
 
