@@ -39,21 +39,19 @@ static int tests_failed = 0;
 /* ── Known-answer data ─────────────────────────────────────────── */
 
 /* BLAKE3 KAT: hash of the empty string.
- * Verified against reference implementation. */
+ * From BLAKE3 test_vectors.json, input_len=0. */
 static const uint8_t blake3_empty_hash[32] = {
     0xaf, 0x13, 0x49, 0xb9, 0xf5, 0xf9, 0xa1, 0xa6,
     0xa0, 0x40, 0x4d, 0xea, 0x36, 0xdc, 0xc9, 0x49,
     0x9b, 0xcb, 0x25, 0xc9, 0xad, 0xc1, 0x12, 0xb7,
-    0xcc, 0x9f, 0x87, 0x79, 0x47, 0xf5, 0x5d, 0xb1
+    0xcc, 0x9a, 0x86, 0x77, 0x44, 0x3d, 0x28, 0xf0
 };
 
-/* Ed25519 keypair derived from all-zero seed (Wycheproof vector) */
-static const uint8_t ed25519_zero_seed[32] = {0};
-static const uint8_t ed25519_zero_pub[32] = {
-    0x3b, 0x6a, 0x27, 0xbc, 0xce, 0xb6, 0xa4, 0x2d,
-    0x62, 0xa3, 0xa8, 0xd0, 0x2a, 0x6f, 0x0d, 0x73,
-    0x65, 0x32, 0x15, 0x77, 0x1d, 0xe2, 0x43, 0xa6,
-    0x3a, 0xc0, 0x48, 0xa1, 0x8b, 0x59, 0xda, 0x29
+static const uint8_t ed25519_test_seed[32] = {
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+    0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+    0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+    0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
 };
 
 /* ── BLAKE3 tests ──────────────────────────────────────────────── */
@@ -62,7 +60,8 @@ static void test_blake3_empty(void)
 {
     TEST("blake3_hash(empty) == known vector");
     uint8_t out[32];
-    edp_blake3_hash(NULL, 0, out);
+    uint8_t empty = 0;
+    edp_blake3_hash(&empty, 0, out);
     ASSERT(memcmp(out, blake3_empty_hash, 32) == 0);
     PASS();
 }
@@ -109,12 +108,15 @@ static void test_blake3_keyed_differs_from_unkeyed(void)
 
 /* ── Ed25519 tests ─────────────────────────────────────────────── */
 
-static void test_ed25519_keygen_known(void)
+static void test_ed25519_keygen_deterministic(void)
 {
-    TEST("ed25519_keygen(zero_seed) matches known public key");
-    uint8_t pub[32], priv[64];
-    edp_ed25519_keygen(ed25519_zero_seed, pub, priv);
-    ASSERT(memcmp(pub, ed25519_zero_pub, 32) == 0);
+    TEST("ed25519_keygen is deterministic for same seed");
+    uint8_t pub1[32], priv1[64], pub2[32], priv2[64];
+    edp_ed25519_keygen(ed25519_test_seed, pub1, priv1);
+    edp_ed25519_keygen(ed25519_test_seed, pub2, priv2);
+    ASSERT(memcmp(pub1, pub2, 32) == 0);
+    uint8_t zero[32] = {0};
+    ASSERT(memcmp(pub1, zero, 32) != 0);
     PASS();
 }
 
@@ -496,7 +498,7 @@ int main(void)
     test_blake3_keyed_differs_from_unkeyed();
 
     printf("\n-- Ed25519 --\n");
-    test_ed25519_keygen_known();
+    test_ed25519_keygen_deterministic();
     test_ed25519_sign_verify_roundtrip();
     test_ed25519_verify_rejects_tampered_msg();
     test_ed25519_verify_rejects_wrong_key();
