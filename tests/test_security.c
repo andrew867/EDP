@@ -251,13 +251,13 @@ static void test_sec07_rate_limit_flood(void)
     edp_peer_table_init(&table);
 
     edp_peer_t *peer = &table.peers[0];
-    peer->node_id  = 0x00FLOOD1;
+    peer->node_id  = 0x00F100D1;
     peer->state    = EDP_PEER_STATE_TRUSTED;
     peer->last_seq = 0;
     peer->rate_window_start_ns = 0;
 
     edp_pkt_ec_t ec = {0};
-    ec.node_id = 0x00FLOOD1;
+    ec.node_id = 0x00F100D1;
 
     int accepted = 0, dropped = 0;
     for (int i = 1; i <= 100; i++) {
