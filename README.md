@@ -23,8 +23,8 @@ a research starting point.
 - An augmentation layer, not a replacement for local hardware TRNGs or the OS CSPRNG.
 - Designed for constrained RISC-V embedded systems (Kendryte K230-class, ~200MHz, <64KB RAM).
 - Authenticated: each node has an Ed25519 identity keypair. Unsigned contributions are rejected.
-- Poisoning-resistant by construction: even an adversary controlling a peer's contribution
-  input cannot predict the local pool output without knowing the local pool state.
+- Designed to resist entropy-pool poisoning: a peer contribution is mixed with
+  the local secret pool state and never replaces it.
 
 ## What EDP is not
 
@@ -48,8 +48,8 @@ event.
 
 EDP lets them pool what they have. Each node mixes contributions from its peers into
 its local state. If one node has a good hardware TRNG, its neighbors benefit. If a
-node is compromised or sends junk, the math says the healthy neighbors shouldn't be
-made worse off.
+node is compromised or sends junk, the construction is intended to ensure
+that healthy neighbors are not made worse off.
 
 The closed-loop aspect is the novel part. All prior work we found uses a client-server
 model (one trusted entropy server, many clients). EDP has no server. Every node is a
@@ -93,23 +93,23 @@ which requires the local platform to be uncompromised.
 ## Architecture
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │           EDP Mesh (UDP multicast)  │
-                    │         224.0.86.1 : 4086 (draft)   │
-                    └─────────────────────────────────────┘
-                           │              │              │
-              ┌────────────┘    ┌─────────┘    ┌────────┘
-              │                 │              │
-         ┌────▼────┐       ┌────▼────┐    ┌───▼─────┐
-         │  OCU-A  │       │  OCU-B  │    │  OCU-C  │
-         │ (arm L) │       │ (torso) │    │ (arm R) │
-         ├─────────┤       ├─────────┤    ├─────────┤
-         │ FPGA    │       │ HW TRNG │    │ IMU src │
-         │  TRNG   │       │ Seed CSR│    │ jitter  │
-         ├─────────┤       ├─────────┤    ├─────────┤
-         │ edp_pool│◄──────│ edp_pool│───►│edp_pool │
-         │  state  │  mix  │  state  │mix │  state  │
-         └─────────┘       └─────────┘    └─────────┘
+                    +-------------------------------------+
+                    |          EDP Mesh (UDP multicast)   |
+                    |        224.0.86.1 : 4086 (draft)    |
+                    +-------------------------------------+
+                           |              |              |
+              +------------+    +---------+    +---------+
+              |                 |              |
+         +----v----+       +----v----+    +----v----+
+         |  OCU-A  |       |  OCU-B  |    |  OCU-C  |
+         | (arm L) |       | (torso) |    | (arm R) |
+         +---------+       +---------+    +---------+
+         | FPGA    |       | HW TRNG |    | IMU src |
+         | TRNG    |       | Seed CSR|    | jitter  |
+         +---------+       +---------+    +---------+
+         | edp_pool|<------| edp_pool|--->| edp_pool|
+         | state   | mix   | state   |mix | state   |
+         +---------+       +---------+    +---------+
 
 Each node:
   1. Harvests local entropy from tiered sources (FPGA TRNG, Seed CSR, IMU, jitter).
@@ -180,14 +180,14 @@ ctest --test-dir build -V
 ```
 
 This runs:
-- **unit** -- 22 unit tests (BLAKE3 KATs, pool mixing, peer logic, staging buffer)
+- **unit** -- 24 unit tests (BLAKE3, Ed25519, pool mixing, peer logic, staging buffer)
 - **security** -- 8 security property tests (poisoning resistance, Sybil delay, rate
   limiting, forward secrecy, tier fraud detection)
 - **integration** -- 3-node loopback mesh test (Linux only, requires `ip` and multicast
   route on loopback)
 
-If vendor fetch is unavailable (no internet), integration tests will not build.
-Document this honestly; don't claim tests pass if you haven't run them.
+If vendor fetch is unavailable, the build may not complete. Document this
+honestly; don't claim tests pass if you haven't run them.
 
 ---
 
