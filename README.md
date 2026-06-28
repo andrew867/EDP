@@ -60,83 +60,6 @@ peer.
 
 ---
 
-## Prior art
-
-| Reference | Approach | Gap |
-|-----------|----------|-----|
-| arXiv:2603.09311 | IoT entropy via RISC-V TEE server | Client-server only |
-| arXiv:2603.10274 / QEaaS | QRNG to ESP32 clients over PQC channels | Expensive QRNG hardware required |
-| ACM 10.1145/3799895 | Remote QRNG via D-Bus | Single host, not networked |
-| drand | Distributed randomness beacon (BLS threshold sigs) | Internet-scale infrastructure, not embedded |
-| Linux `/dev/random` | Kernel entropy pool from hardware events | Single-host; EDP complements, not replaces |
-
-See [`docs/prior_art.md`](docs/prior_art.md) for full citations and discussion.
-
----
-
-## Core security intuition
-
-The pool update rule for a remote contribution is:
-
-```
-pool_{t+1} = BLAKE3(pool_t || remote_tag || ec_entropy || metadata || tier_byte)
-```
-
-The local pool state `pool_t` is secret. Under the random-oracle model, fixing
-`ec_entropy` to any value (including adversarially chosen) doesn't allow predicting
-or controlling `pool_{t+1}` without knowing `pool_t`. So external contributions
-are mixed into local state without replacing it.
-
-This is a proof sketch, not a formal proof. It relies on the random-oracle assumption
-for BLAKE3. The actual security depends on the local pool being and remaining secret,
-which requires the local platform to be uncompromised.
-
----
-
-## Architecture
-
-```
-                    +-------------------------------------+
-                    |          EDP Mesh (UDP multicast)   |
-                    |        224.0.86.1 : 4086 (draft)    |
-                    +-------------------------------------+
-                           |              |              |
-              +------------+    +---------+    +---------+
-              |                 |              |
-         +----v----+       +----v----+    +----v----+
-         |  OCU-A  |       |  OCU-B  |    |  OCU-C  |
-         | (arm L) |       | (torso) |    | (arm R) |
-         +---------+       +---------+    +---------+
-         | FPGA    |       | HW TRNG |    | IMU src |
-         | TRNG    |       | Seed CSR|    | jitter  |
-         +---------+       +---------+    +---------+
-         | edp_pool|<------| edp_pool|--->| edp_pool|
-         | state   | mix   | state   |mix | state   |
-         +---------+       +---------+    +---------+
-
-Each node:
-  1. Harvests local entropy from tiered sources (FPGA TRNG, Seed CSR, IMU, jitter).
-  2. Conditions it through Von Neumann corrector + BLAKE3 keyed hash.
-  3. Accumulates in local staging buffer.
-  4. Broadcasts signed EC (Entropy Contribution) packets every ~1 second.
-  5. Receives peers' EC packets, verifies Ed25519 signature, mixes into local pool.
-  6. Optionally injects output from local pool into the kernel entropy interface.
-```
-
-### Candidate entropy source tiers
-
-| Tier | Source | Claimed rate (unverified) | Notes |
-|------|--------|--------------------------|-------|
-| 0 | FPGA ring-oscillator TRNG | >1 Mbit/s | Prototype -- needs measurement |
-| 1 | RISC-V `seed` CSR (Zkt extension) | ~1 Mbit/s | Hardware-attested; K230 specific |
-| 2 | Sensor physical noise (IMU, encoder, CAN FD) | ~1-2 Kbit/s est. | Requires NIST SP 800-90B assessment |
-| 3 | HAVEGE timing jitter | Variable | Software-only; weakest tier |
-
-All rates are design estimates. None have been formally measured. Do not use tier
-assignments as security guarantees without independent entropy measurement.
-
----
-
 ## Potential application: gaming and lottery systems
 
 Casino floors are meshes of embedded machines that all power on at the same time.
@@ -243,6 +166,83 @@ autonomous vehicle, robotics fleet, or production AI system. The applications
 described here are potential use cases based on the protocol's design properties,
 not claims of deployment or readiness. Any safety-critical use would require
 independent security review and domain-specific certification.
+
+---
+
+## Prior art
+
+| Reference | Approach | Gap |
+|-----------|----------|-----|
+| arXiv:2603.09311 | IoT entropy via RISC-V TEE server | Client-server only |
+| arXiv:2603.10274 / QEaaS | QRNG to ESP32 clients over PQC channels | Expensive QRNG hardware required |
+| ACM 10.1145/3799895 | Remote QRNG via D-Bus | Single host, not networked |
+| drand | Distributed randomness beacon (BLS threshold sigs) | Internet-scale infrastructure, not embedded |
+| Linux `/dev/random` | Kernel entropy pool from hardware events | Single-host; EDP complements, not replaces |
+
+See [`docs/prior_art.md`](docs/prior_art.md) for full citations and discussion.
+
+---
+
+## Core security intuition
+
+The pool update rule for a remote contribution is:
+
+```
+pool_{t+1} = BLAKE3(pool_t || remote_tag || ec_entropy || metadata || tier_byte)
+```
+
+The local pool state `pool_t` is secret. Under the random-oracle model, fixing
+`ec_entropy` to any value (including adversarially chosen) doesn't allow predicting
+or controlling `pool_{t+1}` without knowing `pool_t`. So external contributions
+are mixed into local state without replacing it.
+
+This is a proof sketch, not a formal proof. It relies on the random-oracle assumption
+for BLAKE3. The actual security depends on the local pool being and remaining secret,
+which requires the local platform to be uncompromised.
+
+---
+
+## Architecture
+
+```
+                    +-------------------------------------+
+                    |          EDP Mesh (UDP multicast)   |
+                    |        224.0.86.1 : 4086 (draft)    |
+                    +-------------------------------------+
+                           |              |              |
+              +------------+    +---------+    +---------+
+              |                 |              |
+         +----v----+       +----v----+    +----v----+
+         |  OCU-A  |       |  OCU-B  |    |  OCU-C  |
+         | (arm L) |       | (torso) |    | (arm R) |
+         +---------+       +---------+    +---------+
+         | FPGA    |       | HW TRNG |    | IMU src |
+         | TRNG    |       | Seed CSR|    | jitter  |
+         +---------+       +---------+    +---------+
+         | edp_pool|<------| edp_pool|--->| edp_pool|
+         | state   | mix   | state   |mix | state   |
+         +---------+       +---------+    +---------+
+
+Each node:
+  1. Harvests local entropy from tiered sources (FPGA TRNG, Seed CSR, IMU, jitter).
+  2. Conditions it through Von Neumann corrector + BLAKE3 keyed hash.
+  3. Accumulates in local staging buffer.
+  4. Broadcasts signed EC (Entropy Contribution) packets every ~1 second.
+  5. Receives peers' EC packets, verifies Ed25519 signature, mixes into local pool.
+  6. Optionally injects output from local pool into the kernel entropy interface.
+```
+
+### Candidate entropy source tiers
+
+| Tier | Source | Claimed rate (unverified) | Notes |
+|------|--------|--------------------------|-------|
+| 0 | FPGA ring-oscillator TRNG | >1 Mbit/s | Prototype -- needs measurement |
+| 1 | RISC-V `seed` CSR (Zkt extension) | ~1 Mbit/s | Hardware-attested; K230 specific |
+| 2 | Sensor physical noise (IMU, encoder, CAN FD) | ~1-2 Kbit/s est. | Requires NIST SP 800-90B assessment |
+| 3 | HAVEGE timing jitter | Variable | Software-only; weakest tier |
+
+All rates are design estimates. None have been formally measured. Do not use tier
+assignments as security guarantees without independent entropy measurement.
 
 ---
 
