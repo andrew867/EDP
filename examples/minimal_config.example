@@ -1,0 +1,50 @@
+# minimal_config.example
+# EDP minimal daemon configuration example
+#
+# This shows the minimum configuration to run edpd on a single RISC-V node
+# for testing purposes. NOT a production configuration.
+#
+# Usage:
+#   ./edpd --config minimal_config.example
+#   OR pass options directly on the command line (see edpd --help)
+#
+# IMPORTANT: This example uses software-only entropy sources (HAVEGE timing
+# jitter). It does not claim to produce cryptographically strong entropy.
+# For real use, add a hardware entropy source (FPGA TRNG, Seed CSR).
+
+# Node identity (auto-generated on first run if not present)
+identity = ./edp_identity.bin
+
+# Network interface for EDP multicast
+iface = eth0
+
+# EDP multicast group (draft, not IANA-assigned)
+# Override with --port to use a different port
+# Port 4086 is NOT an IANA-assigned port.
+port = 4086
+
+# Entropy sources (add or remove based on hardware)
+# Available: fpga_trng, seed_csr, imu, encoder, can_fd, havege
+sources = havege
+
+# How often to broadcast EC packets (milliseconds)
+broadcast_interval_ms = 1000
+
+# Sybil delay: how long before accepting EC from a new peer (milliseconds)
+# Minimum recommended: 30000 (30 seconds)
+sybil_delay_ms = 30000
+
+# Stats output file (JSON, written periodically)
+# stats_file = /var/run/edpd/stats.json
+
+# Pool snapshot file (for debugging; contains derived output, not pool state)
+# pool_snapshot = /var/run/edpd/pool.bin
+
+# Log level: error, warn, info, debug
+log_level = info
+
+# PTP integration (requires PTP daemon on same host; uses monotonic fallback if disabled)
+ptp_enabled = false
+
+# Kernel entropy injection (Linux only; requires CAP_SYS_ADMIN or /dev/random write access)
+# inject_to_kernel = false

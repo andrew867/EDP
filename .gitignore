@@ -1,0 +1,34 @@
+# Build artifacts
+build/
+build-riscv/
+*.o
+*.a
+*.so
+*.d
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+
+# Vendored dependencies (fetched by cmake/fetch_vendors.sh)
+vendor/
+
+# Test output
+/tmp/edp_test.*
+*.vcd
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Secrets / keys (never commit these)
+*.pem
+*.key
+identity.bin
