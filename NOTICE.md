@@ -11,7 +11,7 @@ repository; run `./cmake/fetch_vendors.sh` to download them into `vendor/`.
 - **Source:** https://github.com/BLAKE3-team/BLAKE3/tree/1.5.4/c
 - **License:** CC0-1.0 / Apache-2.0 (dual-licensed; see BLAKE3 repo)
 - **Files fetched:** `vendor/blake3.h`, `vendor/blake3.c`,
-  `vendor/blake3_portable.c`, `vendor/blake3_impl.h`
+  `vendor/blake3_portable.c`, `vendor/blake3_dispatch.c`, `vendor/blake3_impl.h`
 
 > The BLAKE3 team has released the C reference implementation under CC0 and
 > Apache-2.0. You may use it under either license. We use the portable C

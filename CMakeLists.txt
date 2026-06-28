@@ -50,6 +50,7 @@ endif()
 #   vendor/blake3.h
 #   vendor/blake3.c
 #   vendor/blake3_portable.c  (BLAKE3 requires this)
+#   vendor/blake3_dispatch.c  (BLAKE3 platform dispatch)
 #   vendor/monocypher.h
 #   vendor/monocypher.c
 #
@@ -57,6 +58,7 @@ endif()
 set(VENDOR_SRCS
     vendor/blake3.c
     vendor/blake3_portable.c
+    vendor/blake3_dispatch.c
     vendor/monocypher.c
 )
 
@@ -72,8 +74,15 @@ set(EDP_CORE_SRCS
 
 add_library(edp_core STATIC ${EDP_CORE_SRCS})
 target_include_directories(edp_core PUBLIC include src vendor)
-# Note: include/ lives at repo root
 target_compile_options(edp_core PRIVATE ${EDP_COMMON_FLAGS})
+# BLAKE3: portable C only, no SIMD assembly files vendored
+target_compile_definitions(edp_core PRIVATE
+    BLAKE3_NO_SSE2
+    BLAKE3_NO_SSE41
+    BLAKE3_NO_AVX2
+    BLAKE3_NO_AVX512
+    BLAKE3_NO_NEON
+)
 
 # ── edpd daemon ───────────────────────────────────────────────────
 add_executable(edpd src/edp_daemon.c)

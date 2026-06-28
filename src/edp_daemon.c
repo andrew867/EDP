@@ -522,3 +522,70 @@ static uint64_t monotonic_ns(void)
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
+
+/* -- Main entry point ------------------------------------------------- */
+
+#include <signal.h>
+#include <sys/random.h>
+
+static edp_daemon_t *g_daemon = NULL;
+
+static void sighandler(int sig)
+{
+    (void)sig;
+    if (g_daemon) edp_daemon_stop(g_daemon);
+}
+
+static int getrandom_harvest(uint8_t *buf, size_t len, void *ctx)
+{
+    (void)ctx;
+    ssize_t got = getrandom(buf, len, 0);
+    return (got > 0) ? (int)got : -1;
+}
+
+int main(int argc, char **argv)
+{
+    edp_config_t cfg;
+    memset(&cfg, 0, sizeof(cfg));
+    cfg.port = EDP_UDP_PORT;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--port") == 0 && i + 1 < argc)
+            cfg.port = (uint16_t)atoi(argv[++i]);
+        else if (strcmp(argv[i], "--iface") == 0 && i + 1 < argc)
+            strncpy(cfg.iface, argv[++i], sizeof(cfg.iface) - 1);
+    }
+
+    if (edp_generate_identity(cfg.pubkey, cfg.privkey) < 0) {
+        fprintf(stderr, "edpd: failed to generate identity\n");
+        return 1;
+    }
+    cfg.node_id = (uint32_t)((uint32_t)cfg.pubkey[0] << 24 |
+                             (uint32_t)cfg.pubkey[1] << 16 |
+                             (uint32_t)cfg.pubkey[2] << 8  |
+                             (uint32_t)cfg.pubkey[3]);
+
+    g_daemon = edp_daemon_create(&cfg);
+    if (!g_daemon) {
+        fprintf(stderr, "edpd: failed to create daemon\n");
+        return 1;
+    }
+
+    edp_source_t src;
+    memset(&src, 0, sizeof(src));
+    strncpy(src.name, "getrandom", EDP_SOURCE_NAME_LEN - 1);
+    src.tier = EDP_TIER_TIMING_JITTER;
+    src.harvest = getrandom_harvest;
+    src.health_score = 500;
+    edp_blake3_hash((const uint8_t *)"edp-getrandom-key", 17,
+                    src.conditioning_key);
+    edp_daemon_add_source(g_daemon, &src);
+
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+
+    printf("edpd: starting (node %08x, port %u)\n", cfg.node_id, cfg.port);
+    int rc = edp_daemon_run(g_daemon);
+    edp_daemon_destroy(g_daemon);
+    return rc;
+}

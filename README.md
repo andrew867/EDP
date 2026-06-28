@@ -148,8 +148,9 @@ assignments as security guarantees without independent entropy measurement.
 ./cmake/fetch_vendors.sh
 ```
 
-This downloads `blake3.{c,h}`, `blake3_portable.c`, `blake3_impl.h`,
-`monocypher.{c,h}` into `vendor/`. They are not included in the repo.
+This downloads `blake3.{c,h}`, `blake3_portable.c`, `blake3_dispatch.c`,
+`blake3_impl.h`, `monocypher.{c,h}` into `vendor/`. They are not included
+in the repo.
 
 ### Native build (x86, for testing)
 

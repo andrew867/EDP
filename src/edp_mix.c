@@ -139,8 +139,7 @@ void edp_pool_extract(edp_pool_t *pool, uint8_t *out, size_t len)
     blake3_hasher h;
     blake3_hasher_init(&h);
     blake3_hasher_update(&h, pool->state, 32);
-    /* XOF: BLAKE3 can produce arbitrary output length */
-    blake3_hasher_finalize_xof(&h, out, len);
+    blake3_hasher_finalize(&h, out, len);
 
     /* Re-key: derive new pool state from output + a counter */
     uint8_t rekey_input[36];

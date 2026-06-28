@@ -15,6 +15,7 @@ curl -fsSL "$BLAKE3_BASE/blake3.h"          -o "$VENDOR_DIR/blake3.h"
 curl -fsSL "$BLAKE3_BASE/blake3.c"          -o "$VENDOR_DIR/blake3.c"
 curl -fsSL "$BLAKE3_BASE/blake3_portable.c" -o "$VENDOR_DIR/blake3_portable.c"
 curl -fsSL "$BLAKE3_BASE/blake3_impl.h"     -o "$VENDOR_DIR/blake3_impl.h"
+curl -fsSL "$BLAKE3_BASE/blake3_dispatch.c" -o "$VENDOR_DIR/blake3_dispatch.c"
 echo "  BLAKE3 ${BLAKE3_VERSION} -> vendor/"
 
 echo "Fetching Monocypher..."
