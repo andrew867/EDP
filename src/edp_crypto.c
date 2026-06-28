@@ -45,7 +45,10 @@ void edp_ed25519_keygen(const uint8_t seed[32],
                         uint8_t pub[32],
                         uint8_t priv[64])
 {
-    crypto_eddsa_key_pair(priv, pub, seed);
+    /* Monocypher wipes the seed after use; copy to avoid writing to const/rodata */
+    uint8_t seed_copy[32];
+    memcpy(seed_copy, seed, 32);
+    crypto_eddsa_key_pair(priv, pub, seed_copy);
 }
 
 void edp_ed25519_sign(const uint8_t priv[64],

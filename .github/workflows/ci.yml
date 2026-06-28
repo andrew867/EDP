@@ -31,6 +31,4 @@ jobs:
         run: cmake --build build
 
       - name: Run tests
-        run: ctest --test-dir build -V
-
-      # TODO: Add integration tests once multicast loopback behavior is verified on GitHub Actions.
+        run: ctest --test-dir build -V -E integration
