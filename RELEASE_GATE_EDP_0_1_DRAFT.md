@@ -72,16 +72,14 @@ Each item is marked PASS, FAIL, or SKIP (with reason).
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| cmake configuration succeeds | ⚠️ UNVERIFIED | Requires vendor fetch |
-| cmake build succeeds | ⚠️ UNVERIFIED | Requires vendor fetch |
-| Unit tests pass | ⚠️ UNVERIFIED | Requires build |
-| Security tests pass | ⚠️ UNVERIFIED | Requires build |
-| Integration tests pass | ⚠️ UNVERIFIED | Requires build + Linux multicast |
-| FPGA simulation (iverilog) passes | ⚠️ UNVERIFIED | Requires iverilog |
+| cmake configuration succeeds | PASS | CI run 28326683008 |
+| cmake build succeeds | PASS | CI run 28326683008 |
+| Unit tests pass (24/24) | PASS | CI run 28326683008 |
+| Security tests pass (8/8) | PASS | CI run 28326683008 |
+| Integration tests pass | SKIP | Multicast loopback unavailable on GitHub Actions |
+| FPGA simulation (iverilog) passes | SKIP | iverilog not installed in CI |
 
-**These tests have not been run against the public release tree.** They were
-developed and designed against the internal prototype. Running them is the first
-thing a contributor should do.
+**CI evidence:** https://github.com/andrew867/EDP/actions/runs/28326683008
 
 ---
 
@@ -126,9 +124,9 @@ thing a contributor should do.
 
 ## Final verdict
 
-**READY TO PUSH: YES** -- with the caveats that build and test status are
-unverified in the release tree (vendor fetch required), and consumers must
-treat this as a research/prototype release per all documentation.
+**READY TO PUSH: YES** -- public CI is green (unit 24/24, security 8/8),
+and consumers must treat this as a research/prototype release per all
+documentation.
 
 The repository is honest about what it is and what it is not. That's the bar
 for this release.

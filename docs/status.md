@@ -1,6 +1,9 @@
 # Build and Test Status
 
-CI: pending.
+CI: passing.
 
-The GitHub Actions workflow has been added, but the public run still needs to
-be verified before any release gate is marked PASS.
+- Unit tests: 24/24
+- Security tests: 8/8
+- Integration tests: skipped in CI (multicast loopback unavailable on GitHub Actions)
+
+Badge: ![CI](https://github.com/andrew867/EDP/actions/workflows/ci.yml/badge.svg)
