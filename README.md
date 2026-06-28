@@ -134,6 +134,57 @@ assignments as security guarantees without independent entropy measurement.
 
 ---
 
+## Potential application: gaming and lottery systems
+
+Casino floors are meshes of embedded machines that all power on at the same time.
+
+A typical slot machine or video lottery terminal (VLT) runs a constrained embedded
+OS on hardware that has been in service for years -- sometimes decades. At boot,
+before enough hardware events have accumulated, the local entropy pool is thin.
+Every machine on the floor hits this window simultaneously, from the same breaker
+panel, after the same power cycle. The result is a fleet of devices making
+security-critical random draws from shallow pools during exactly the period when
+the floor is opening and players are arriving.
+
+This is the same mesh-of-constrained-devices problem EDP was designed for.
+
+**Where EDP fits in the gaming stack:**
+
+- **Slot machines and VLTs.** Legacy gaming hardware often lacks a dedicated TRNG.
+  EDP lets machines on the same floor segment augment each other's entropy pools
+  over the existing network fabric, without replacing the certified per-machine RNG.
+  The protocol rides alongside G2S (Game to System) or SAS -- it does not modify
+  game outcome logic.
+
+- **Linked progressive jackpots.** Progressive systems span dozens or hundreds of
+  machines across multiple properties. The central controller that triggers a
+  jackpot event needs high-quality randomness that is not correlated with any
+  single machine's local state. A mesh of EDP peers feeding the controller means
+  no single point of entropy failure.
+
+- **Instant-win and point-of-sale games.** Lottery terminals at retail counters,
+  promotional kiosks, and contest-draw systems are embedded devices in the same
+  class as VLTs -- low-power, long-lived, booting from flash with minimal
+  entropy sources. They often run draws within seconds of power-on.
+
+- **Backend servers.** Promotional game engines, contest platforms, and lottery
+  draw servers can use EDP as a peer entropy feed alongside their existing
+  CSPRNG, adding diversity without single-source dependence.
+
+- **Regulatory fit.** Gaming jurisdictions require certified RNGs (GLI-19,
+  BMM testlabs, provincial/state gaming commissions). EDP is an entropy
+  *source layer*, not an RNG replacement. It feeds the pool that the certified
+  RNG draws from. The per-contribution Ed25519 signatures provide an audit
+  trail that regulators can inspect: which peer contributed what, when, and
+  whether the signature verified.
+
+**Important caveats:** EDP is a draft protocol and is not certified for
+regulated gaming use. Any deployment in a gaming environment would require
+independent certification by an accredited testing laboratory. The use case
+described here is a potential application, not a claim of readiness.
+
+---
+
 ## Building
 
 ### Prerequisites
