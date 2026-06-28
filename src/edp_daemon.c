@@ -27,6 +27,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+#include <signal.h>
+#include <sys/random.h>
 
 #define MAX_PKT_SIZE   512
 #define MAX_EVENTS     8
@@ -524,9 +526,6 @@ static uint64_t monotonic_ns(void)
 }
 
 /* -- Main entry point ------------------------------------------------- */
-
-#include <signal.h>
-#include <sys/random.h>
 
 static edp_daemon_t *g_daemon = NULL;
 
